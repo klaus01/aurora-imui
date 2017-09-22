@@ -28,6 +28,11 @@ import UIKit
    *  return time label frame in the layout
    */
   var timeLabelFrame: CGRect { get }
+    
+  /**
+   *  return time label
+   */
+  var timeLabel: UILabel { get }
   
   /**
    *  return message bubble frame in the layout

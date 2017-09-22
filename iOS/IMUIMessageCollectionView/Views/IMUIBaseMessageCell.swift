@@ -19,9 +19,9 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   
   var bubbleView: IMUIMessageBubbleView
   lazy var avatarImage = UIImageView()
-  lazy var timeLabel = UILabel()
   lazy var nameLabel = UILabel()
   
+  weak var timeLabel: UILabel!
   weak var statusView: UIView?
   weak var bubbleContentView: IMUIMessageContentViewProtocol?
   var bubbleContentType = ""
@@ -36,7 +36,6 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
     
     self.contentView.addSubview(self.bubbleView)
     self.contentView.addSubview(self.avatarImage)
-    self.contentView.addSubview(self.timeLabel)
     self.contentView.addSubview(self.nameLabel)
     avatarImage.layer.masksToBounds = true
     self.avatarImage.layer.cornerRadius = CGFloat(IMUIBaseMessageCell.avatarCornerRadius)
@@ -54,14 +53,6 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
     avatarImage.addGestureRecognizer(avatarGesture)
     
     nameLabel.font = IMUIMessageCellLayout.nameLabelTextFont
-    
-    self.setupSubViews()
-  }
-  
-  fileprivate func setupSubViews() {
-    timeLabel.textAlignment = .center
-    timeLabel.textColor = IMUIMessageCellLayout.timeStringColor
-    timeLabel.font = IMUIMessageCellLayout.timeStringFont
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -69,6 +60,10 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   }
   
   func layoutCell(with layout: IMUIMessageCellLayoutProtocol, viewCache: IMUIReuseViewCache) {
+    if self.timeLabel == nil {
+        self.timeLabel = layout.timeLabel
+        self.contentView.addSubview(self.timeLabel)
+    }
     self.timeLabel.frame = layout.timeLabelFrame
     self.avatarImage.frame = layout.avatarFrame
     self.bubbleView.frame = layout.bubbleFrame
