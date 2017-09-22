@@ -42,9 +42,6 @@ open class IMUIMessageCellLayout: NSObject, IMUIMessageCellLayoutProtocol {
   public static var nameLabelTextColor: UIColor = UIColor(netHex: 0x7587A8)
   public static var nameLabelTextFont: UIFont = UIFont.systemFont(ofSize: 12)
   
-  public static var timeStringColor: UIColor = UIColor(netHex: 0x90A6C4)
-  public static var timeStringFont: UIFont = UIFont.systemFont(ofSize: 12)
-  
   public init(isOutGoingMessage: Bool,
                  isNeedShowTime: Bool,
               bubbleContentSize: CGSize,
@@ -227,6 +224,14 @@ open class IMUIMessageCellLayout: NSObject, IMUIMessageCellLayoutProtocol {
       return CGRect.zero
     }
   }
+
+  open var timeLabel: UILabel = {
+    let view = UILabel()
+    view.textAlignment = .center
+    view.textColor = UIColor(netHex: 0x90A6C4)
+    view.font = UIFont.systemFont(ofSize: 12)
+    return view
+  }()
   
   open var cellHeight: CGFloat {
     var cellHeight = IMUIMessageCellLayout.bubbleOffsetToAvatar.vertical +
