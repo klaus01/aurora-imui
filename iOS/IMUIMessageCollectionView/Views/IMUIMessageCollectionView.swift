@@ -88,7 +88,13 @@ open class IMUIMessageCollectionView: UIView {
     self.messageCollectionView.reloadData()
     self.scrollToBottom(with: true)
   }
-  
+    
+  open func appendMessages(with messages: [IMUIMessageProtocol]) {
+    self.chatDataManager.appendMessages(with: messages)
+    self.messageCollectionView.reloadData()
+    self.scrollToBottom(with: true)
+  }
+
   open func insertMessage(with message: IMUIMessageProtocol) {
     self.chatDataManager.insertMessage(with: message)
     self.messageCollectionView.reloadDataNoScroll()

@@ -45,7 +45,13 @@ class IMUIChatDataManager: NSObject {
     self.allMsgidArr.append(message.msgId)
     self.allMessageDic[message.msgId] = message
   }
-  
+    
+  open func appendMessages(with messages: [IMUIMessageProtocol]) {
+    for element in messages {
+        self.appendMessage(with: element)
+    }
+  }
+
   func updateMessage(with message: IMUIMessageProtocol) {
     if message.msgId == "" {
       print("the msgId is empty, cann't update message")
