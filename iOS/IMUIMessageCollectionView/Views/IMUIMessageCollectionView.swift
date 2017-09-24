@@ -137,13 +137,13 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
                       sizeForItemAtIndexPath indexPath: IndexPath) -> CGSize {
     let height = self.delegate?.messageCollectionView?(messageCollectionView: collectionView, heightForItemAtIndexPath: indexPath, messageModel: chatDataManager[indexPath.item])
     if let _ = height {
-      return CGSize(width: messageCollectionView.imui_width, height: CGFloat(height!.floatValue))
+      return CGSize(width: collectionView.superview!.imui_width, height: CGFloat(height!.floatValue))
     }
     
     let messageModel = chatDataManager[indexPath.item]
     if messageModel is IMUIMessageModelProtocol {
       let message = messageModel as! IMUIMessageModelProtocol
-      return CGSize(width: messageCollectionView.imui_width, height: message.layout.cellHeight)
+      return CGSize(width: collectionView.superview!.imui_width, height: message.layout.cellHeight)
     }
     
     return CGSize.zero
