@@ -206,6 +206,12 @@ extension IMUIMessageCollectionView: UIScrollViewDelegate {
   public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
     self.delegate?.messageCollectionView?(self.messageCollectionView)
   }
+  public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    self.delegate?.messageCollectionViewDidEndDragging?(scrollView, willDecelerate: decelerate)
+  }
+  public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    self.delegate?.messageCollectionViewDidEndDecelerating?(scrollView)
+  }
 }
 
 public extension UICollectionView {
@@ -219,8 +225,6 @@ public extension UICollectionView {
     
     let deltaHeight = contentSizeAfterInsert.height - contentSizeBeforeInsert.height
     currentOffset.y += (deltaHeight > 0 ? deltaHeight : 0)
-    print("the currentOffset\(currentOffset.y)")
-    print("the currentOffset\(currentOffset)")
     self.setContentOffset(currentOffset, animated: false)
   }
 }
