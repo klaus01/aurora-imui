@@ -11,54 +11,45 @@ import UIKit
 
 open class IMUIMessageCollectionView: UIView {
 
-  @IBOutlet var view: UIView!
-  @IBOutlet open weak var messageCollectionView: UICollectionView!
+  open lazy var messageCollectionView: UICollectionView = {
+    let layout = UICollectionViewFlowLayout()
+    layout.minimumLineSpacing = 0
+    layout.minimumInteritemSpacing = 0
+    layout.scrollDirection = .vertical
+    layout.headerReferenceSize = CGSize.zero
+    layout.footerReferenceSize = CGSize.zero
+    layout.sectionInset = UIEdgeInsets.zero
+
+    let view = UICollectionView(frame: self.bounds, collectionViewLayout: layout)
+    view.backgroundColor = UIColor.clear
+    view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+    view.delegate = self
+    view.dataSource = self
+    view.register(IMUIBaseMessageCell.self, forCellWithReuseIdentifier: IMUIBaseMessageCell.self.description())
+    view.isScrollEnabled = true
+    return view
+  }()
 
   var viewCache = IMUIReuseViewCache()
   
   var chatDataManager = IMUIChatDataManager()
   open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
   
-  open override func awakeFromNib() {
-    super.awakeFromNib()
-  }
-  
   override init(frame: CGRect) {
     super.init(frame: frame)
-    let bundle = Bundle.imuiBundle()
-    view = bundle.loadNibNamed("IMUIMessageCollectionView", owner: self, options: nil)?.first as! UIView
-    
-    self.addSubview(view)
-    view.frame = self.bounds
+    self.addSubview(messageCollectionView)
     self.chatDataManager = IMUIChatDataManager()
-    self.setupMessageCollectionView()
   }
   
   required public init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
-    
-    let bundle = Bundle.imuiBundle()
-    view = bundle.loadNibNamed("IMUIMessageCollectionView", owner: self, options: nil)?.first as! UIView
-    
-    self.addSubview(view)
-    view.frame = self.bounds
+    self.addSubview(messageCollectionView)
     self.chatDataManager = IMUIChatDataManager()
-    self.setupMessageCollectionView()
   }
   
   override open func layoutSubviews() {
     super.layoutSubviews()
     IMUIMessageCellLayout.cellWidth = self.imui_width
-  }
-  
-  func setupMessageCollectionView() {
-
-    self.messageCollectionView.delegate = self
-    self.messageCollectionView.dataSource = self
-    
-    self.messageCollectionView.register(IMUIBaseMessageCell.self, forCellWithReuseIdentifier: IMUIBaseMessageCell.self.description())
-    
-    self.messageCollectionView.isScrollEnabled = true
   }
   
   open func register(_ cellClass: AnyClass?, forCellWithReuseIdentifier identifier: String) {
