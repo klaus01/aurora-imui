@@ -61,8 +61,9 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   
   func layoutCell(with layout: IMUIMessageCellLayoutProtocol, viewCache: IMUIReuseViewCache) {
     if self.timeLabel == nil {
-        self.timeLabel = layout.timeLabel
-        self.contentView.addSubview(self.timeLabel)
+        let label = layout.timeLabel
+        self.timeLabel = label
+        self.contentView.addSubview(label)
     }
     self.timeLabel.frame = layout.timeLabelFrame
     self.avatarImage.frame = layout.avatarFrame
@@ -156,8 +157,9 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   }
   
   func presentCell(with message: IMUIMessageModelProtocol, viewCache: IMUIReuseViewCache, delegate: IMUIMessageMessageCollectionViewDelegate?) {
-    
-    self.layoutCell(with: message.layout, viewCache: viewCache)
+    UIView.performWithoutAnimation {
+        self.layoutCell(with: message.layout, viewCache: viewCache)
+    }
     self.setupData(with: message)
     self.delegate = delegate
   }
