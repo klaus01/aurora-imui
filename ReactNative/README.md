@@ -54,7 +54,6 @@ dependencies {
 
   - PROJECT -> TARGETS -> Build Settings -> Enable Bitcode Set to No
   - Find PROJECT -> TARGETS -> General -> Embedded Binaries  and add RCTAuroraIMUI.framework
-  - Before build you project ,you should build RCTAuroraIMUI.framework
 
 ## Usage
 ```
@@ -72,7 +71,7 @@ By using MessageList, you need define `message` object and `fromUser` object.
 
 - message object format:
 
-** status must be one of the four values: "send_succeed", "send_failed", "send_going", "download_failed", 
+**status must be one of the four values: "send_succeed", "send_failed", "send_going", "download_failed", 
 if you haven't define this property, default value is "send_succeed".**
 
  ```
@@ -136,12 +135,10 @@ message = {  // event message
 
   ### MessageList Event
 - onAvatarClick {message: {message json}} :Fires when click avatar
-
 - onMsgClick {message: {message json} : Fires when click message bubble
-
 - onStatusViewClick {message: {message json}}  Fires when click status view
-
 - onPullToRefresh  Fires when pull MessageList to top, example usage: please refer sample's onPullToRefresh method.
+- onTouchMsgList  Fires when touch message list.
 
 
 - onBeginDragMessageList (iOS only)
@@ -276,29 +273,18 @@ AuroraIMUIController.insertMessagesToTop(messages);
 ### ChatInput Event
 
 - onSendText: input the text and click send button
-
 - onSendGalleryFiles: select gallery photo and click send button will send this event
-
 - onTakePicture: take picture from carmera will send this event
-
 - onStartRecordVideo: start to record video button will send this event
-
 - onFinishRecordVideo: finish recorded video will send this event
-
 - onCancelRecordVideo: cancel recorded video will send this event
-
 - onStartRecordVoice: start to record voice will send this event 
-
 - onFinishRecordVoice: finish  record voice will send this event
-
 - onCancelRecordVoice: cancel recorded voice will send this event
-
-- onSwitchToMicrophoneMode: click the microphone button in feature view will send this event
-
-- onSwitchToGalleryMode: click the gallery button in feature view will send this event
-
-- onSwitchToCameraMode: click the camera button in feature view will send this event
-
+- onSwitchToMicrophoneMode: click the microphone button in input view will send this event
+- onSwitchToGalleryMode: click the gallery button in input view will send this event
+- onSwitchToCameraMode: click the camera button in input view will send this event
+- onSwitchToEmojiMode: click the emoji button in input view will send this event
 - onTouchEditText:（Android only）click text input view will send this event
 
 ## Style 

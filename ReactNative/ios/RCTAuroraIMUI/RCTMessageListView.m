@@ -55,12 +55,22 @@
     [_messageList.messageCollectionView addSubview:self.refreshControl];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
       _messageList.messageCollectionView.alwaysBounceVertical = YES;
+      
+      UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handTap:)];
+      _messageList.messageCollectionView.backgroundView = [UIView new];
+      _messageList.messageCollectionView.backgroundView.userInteractionEnabled = YES;
+      [_messageList.messageCollectionView.backgroundView addGestureRecognizer:gesture];
     });
   }
   
   [[NSNotificationCenter defaultCenter] postNotificationName:kMessageListDidLoad object: nil];
   
   return self;
+}
+
+- (void)handTap:(UITapGestureRecognizer*)gesture {
+  if(!_onTouchMsgList) { return; }
+  _onTouchMsgList(@{});
 }
 
 - (void)setIsAllowPullToRefresh:(BOOL)isAllow {
@@ -125,8 +135,13 @@
   
   NSMutableArray *messageModels = @[].mutableCopy;
   for (NSDictionary *message in messages) {
-    RCTMessageModel * messageModel = [self convertMessageDicToModel: message];
-    [messageModels addObject: messageModel];
+    if([message[@"msgType"] isEqual: @"event"]) {
+      MessageEventModel *event = [[MessageEventModel alloc] initWithMessageDic:message];
+      [messageModels addObject: event];
+    } else {
+      RCTMessageModel * messageModel = [self convertMessageDicToModel:message];
+      [messageModels addObject: messageModel];
+    }
   }
   
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -136,11 +151,17 @@
 
 - (void)updateMessage:(NSNotification *) notification {
   NSDictionary *message = [notification object];
-  RCTMessageModel * messageModel = [self convertMessageDicToModel: message];
-  
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [self.messageList updateMessageWith: messageModel];
-  });
+  if([message[@"msgType"] isEqual: @"event"]) {
+    MessageEventModel *event = [[MessageEventModel alloc] initWithMessageDic:message];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self.messageList updateMessageWith: event];
+    });
+  } else {
+    RCTMessageModel * messageModel = [self convertMessageDicToModel:message];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self.messageList updateMessageWith: messageModel];
+    });
+  }
 }
 
 - (void)scrollToBottom:(NSNotification *) notification {

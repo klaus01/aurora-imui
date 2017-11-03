@@ -34,9 +34,12 @@ import UIKit
     eventLabel.textAlignment = .center
   }
   
-  open func presentCell(event: MessageEventModel) {
+  @objc open func presentCell(event: MessageEventModel) {
     eventLabel.text = event.eventText
-    eventLabel.frame = CGRect(origin: CGPoint.zero, size: event.evenSize)
+    
+    eventLabel.frame = CGRect(x: 0, y: 0,
+                              width: Int(event.evenSize.width + 1),
+                              height: Int(event.evenSize.height + 1))
     eventLabel.center = self.contentView.center
     eventLabel.frame.origin.y = MessageEventCollectionViewCell.paddingGap * 2
   }

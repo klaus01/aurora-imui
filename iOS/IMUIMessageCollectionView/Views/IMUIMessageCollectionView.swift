@@ -33,7 +33,7 @@ open class IMUIMessageCollectionView: UIView {
   var viewCache = IMUIReuseViewCache()
   
   var chatDataManager = IMUIChatDataManager()
-  open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
+  @objc open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
   
   override init(frame: CGRect) {
     super.init(frame: frame)
@@ -68,35 +68,35 @@ open class IMUIMessageCollectionView: UIView {
     return chatDataManager.count
   }
   
-  open func scrollToBottom(with animated: Bool) {
+  @objc open func scrollToBottom(with animated: Bool) {
     if chatDataManager.count == 0 { return }
     let endIndex = IndexPath(item: chatDataManager.endIndex - 1, section: 0)
     self.messageCollectionView.scrollToItem(at: endIndex, at: .bottom, animated: animated)
   }
   
-  open func appendMessage(with message: IMUIMessageProtocol) {
+  @objc open func appendMessage(with message: IMUIMessageProtocol) {
     self.chatDataManager.appendMessage(with: message)
     self.messageCollectionView.reloadData()
     self.scrollToBottom(with: true)
   }
-    
-  open func appendMessages(with messages: [IMUIMessageProtocol]) {
+
+  @objc open func appendMessages(with messages: [IMUIMessageProtocol]) {
     self.chatDataManager.appendMessages(with: messages)
     self.messageCollectionView.reloadData()
     self.scrollToBottom(with: true)
   }
 
-  open func insertMessage(with message: IMUIMessageProtocol) {
+  @objc open func insertMessage(with message: IMUIMessageProtocol) {
     self.chatDataManager.insertMessage(with: message)
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  open func insertMessages(with messages:[IMUIMessageProtocol]) {
+  @objc open func insertMessages(with messages:[IMUIMessageProtocol]) {
     self.chatDataManager.insertMessages(with: messages)
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  open func updateMessage(with message:IMUIMessageProtocol) {
+  @objc open func updateMessage(with message:IMUIMessageProtocol) {
     self.chatDataManager.updateMessage(with: message)
     if let index = chatDataManager.index(of: message) {
       let indexPath = IndexPath(item: index, section: 0)
@@ -104,7 +104,7 @@ open class IMUIMessageCollectionView: UIView {
     }
   }
   
-  open func removeMessage(with messageId: String) {
+  @objc open func removeMessage(with messageId: String) {
     self.chatDataManager.removeMessage(with: messageId)
     self.messageCollectionView.reloadDataNoScroll()
   }

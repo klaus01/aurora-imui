@@ -46,15 +46,10 @@ dependencies {
   ```
 
 
-
-
-
-
 - ### iOS
 
   - PROJECT -> TARGETS -> Build Settings -> Enable Bitcode Set to No
   - Find PROJECT -> TARGETS -> General -> Embedded Binaries  and add RCTAuroraIMUI.framework
-  - 构建你的项目之前，你需要构建 RCTAuroraIMUI.framework
 
 - ## 用法
 ```
@@ -146,6 +141,7 @@ message = {  // event message
 - onMsgClick {message: {message json} :  点击消息气泡触发
 - onStatusViewClick {message: {message json}}  点击消息状态按钮触发
 - onPullToRefresh  滚动 MessageList 到顶部时，下拉触发, 案例用法: 参考 sample 中的聊天组件中的 onPullToRefresh  方法。
+- onTouchMsgList  点击消息列表触发
 - onTouchMsgList（Android only）点击聊天列表触发
 
 
@@ -281,29 +277,18 @@ AuroraIMUIController.insertMessagesToTop(messages);
 ### ChatInput 事件
 
 - onSendText 输入文字后点击发送按钮触发
-
 - onSendGalleryFiles 选中视频或图片后点击发送按钮触发
-
 - onTakePicture 点击拍照按钮触发
-
 - onStartRecordVideo 点击录制视频按钮触发
-
 - onFinishRecordVideo 完成录制视频触发
-
 - onCancelRecordVideo 取消录制视频触发
-
 - onStartRecordVoice 点击录音按钮触发
-
 - onFinishRecordVoice 录音完成后松开手指触发
-
 - onCancelRecordVoice 手指移动到取消录音区域后，抬起手指触发
-
 - onSwitchToMicrophoneMode 点击菜单栏麦克风按钮触发
-
 - onSwitchToGalleryMode 点击菜单栏图片按钮触发
-
 - onSwitchToCameraMode 点击菜单栏拍照按钮触发
-
+- onSwitchToEmojiMode 点击菜单栏表情按钮触发
 - onTouchEditText（Android only）点击输入框触发
 
 ## 样式 
