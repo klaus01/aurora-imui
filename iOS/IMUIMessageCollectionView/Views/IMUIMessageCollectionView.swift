@@ -111,8 +111,8 @@ open class IMUIMessageCollectionView: UIView {
   
 }
 
-// MARK: - UICollectionViewDelegate, UICollectionViewDataSource
-extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewDataSource {
+// MARK: - UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
   
   public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return self.chatDataManager.count
@@ -123,9 +123,9 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
     return 1
   }
   
-  func collectionView(_ collectionView: UICollectionView,
-                      layout collectionViewLayout: UICollectionViewLayout,
-                      sizeForItemAtIndexPath indexPath: IndexPath) -> CGSize {
+  public func collectionView(_ collectionView: UICollectionView,
+                             layout collectionViewLayout: UICollectionViewLayout,
+                             sizeForItemAt indexPath: IndexPath) -> CGSize {
     let height = self.delegate?.messageCollectionView?(messageCollectionView: collectionView, heightForItemAtIndexPath: indexPath, messageModel: chatDataManager[indexPath.item])
     if let _ = height {
       return CGSize(width: collectionView.superview!.imui_width, height: CGFloat(height!.floatValue))
@@ -137,12 +137,6 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
       return CGSize(width: collectionView.superview!.imui_width, height: message.layout.cellHeight)
     }
     
-    return CGSize.zero
-  }
-  
-  func collectionView(_ collectionView: UICollectionView,
-                      layout collectionViewLayout: UICollectionViewLayout,
-                      referenceSizeForFooterInSection section: Int) -> CGSize {
     return CGSize.zero
   }
   

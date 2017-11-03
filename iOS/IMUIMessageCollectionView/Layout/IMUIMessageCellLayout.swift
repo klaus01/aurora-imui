@@ -332,7 +332,7 @@ open class IMUIMessageCellLayout: NSObject, IMUIMessageCellLayoutProtocol {
 
 class IMUIDefaultContentView: UIView, IMUIMessageContentViewProtocol{
   
-  func layoutContentView(message message: IMUIMessageModelProtocol) {
+  func layoutContentView(message: IMUIMessageModelProtocol) {
   
   }
   
