@@ -67,6 +67,10 @@ open class IMUIMessageCollectionView: UIView {
   open var messageCount: Int {
     return chatDataManager.count
   }
+
+  open func index(of element: IMUIMessageProtocol) -> Int? {
+    return chatDataManager.index(of: element)
+  }
   
   @objc open func scrollToBottom(with animated: Bool) {
     if chatDataManager.count == 0 { return }
@@ -155,12 +159,12 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
     let cell: IMUIMessageCellProtocol = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentify, for: indexPath) as! IMUIMessageCellProtocol
     
     cell.presentCell(with: messageModel as! IMUIMessageModelProtocol, viewCache: viewCache, delegate: delegate)
-    self.delegate?.messageCollectionView?(collectionView,
-                                         willDisplayMessageCell: cell as! UICollectionViewCell,
-                                         forItemAt: indexPath,
-                                         model: messageModel)
-    
     return cell as! UICollectionViewCell
+  }
+    
+  public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    let messageModel = self.chatDataManager[indexPath.item]
+    self.delegate?.messageCollectionView?(collectionView, willDisplayMessageCell: cell, forItemAt: indexPath, model: messageModel)
   }
   
   public func collectionView(_ collectionView: UICollectionView,
