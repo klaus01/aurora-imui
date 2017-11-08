@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public extension UIImage {
+extension UIImage {
   class func imuiImage(with name: String) -> UIImage? {
     let bundle = Bundle.imuiBundle()
     let imagePath = bundle.path(forResource: "IMUIAssets.bundle/image/\(name)", ofType: "png")

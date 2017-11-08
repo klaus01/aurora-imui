@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public extension UIImage {
+extension UIImage {
   
   var jpegRepresentationData: Data! {
     return UIImageJPEGRepresentation(self, 1.0)    // QUALITY min = 0 / max = 1

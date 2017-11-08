@@ -8,7 +8,7 @@
 
 import Foundation
 
-public extension Bundle {
+extension Bundle {
   class func imuiBundle() -> Bundle {
     return Bundle(for: IMUIMessageCollectionView.self)
   }
