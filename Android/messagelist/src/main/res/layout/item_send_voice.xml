@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/aurora_msgitem_send_style">
 
-    <TextView
+    <cn.jiguang.imui.view.RoundTextView
         android:id="@+id/aurora_tv_msgitem_date"
         style="@style/aurora_msgitem_date_style"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
+        android:layout_marginTop="10dp">
 
         <cn.jiguang.imui.view.RoundImageView
             android:id="@+id/aurora_iv_msgitem_avatar"
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="3dp"
                 android:background="@drawable/aurora_sendtxt_bubble"
-                android:maxWidth="220dp" />
+                android:maxWidth="220dp"/>
 
             <ImageView
                 android:id="@+id/aurora_iv_msgitem_voice_anim"
@@ -54,10 +54,10 @@
                 android:id="@+id/aurora_tv_voice_length"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|left"
-                android:layout_marginLeft="5dp"
+                android:layout_gravity="center_vertical|start"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:text="3'"
-                android:layout_marginRight="10dp"
                 android:textColor="#555555"
                 android:textSize="12sp" />
 
@@ -83,6 +83,8 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="3dp"
             android:layout_toLeftOf="@id/aurora_fl_msgitem_voice_container"
+            android:layout_alignTop="@+id/aurora_fl_msgitem_voice_container"
+            android:layout_alignBottom="@+id/aurora_fl_msgitem_voice_container"
             android:visibility="visible"/>
 
     </RelativeLayout>

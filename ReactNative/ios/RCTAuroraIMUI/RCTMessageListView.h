@@ -31,13 +31,15 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPullToRefresh;
 
 // custom layout
+@property(copy, nonatomic) NSString *messageListBackgroundColor;
+
 @property(strong, nonatomic) NSDictionary *sendBubble;
 
 @property(strong, nonatomic) NSDictionary *receiveBubble;
 
-@property(strong, nonatomic) NSString *sendBubbleTextColor;
+@property(copy, nonatomic) NSString *sendBubbleTextColor;
 
-@property(strong, nonatomic) NSString *receiveBubbleTextColor;
+@property(copy, nonatomic) NSString *receiveBubbleTextColor;
 
 @property(assign, nonatomic) NSNumber *sendBubbleTextSize;
 
@@ -45,7 +47,7 @@
 
 @property(assign, nonatomic) NSNumber *dateTextSize;
 
-@property(strong, nonatomic) NSString *dateTextColor;
+@property(copy, nonatomic) NSString *dateTextColor;
 
 @property(strong, nonatomic) NSDictionary *avatarSize;
 
@@ -60,5 +62,26 @@
 @property(strong, nonatomic) NSDictionary *sendBubblePadding;
 
 @property(strong, nonatomic) NSDictionary *receiveBubblePadding;
+
+
+
+
+// TODO:
+@property(strong, nonatomic) NSDictionary *datePadding;
+@property(copy, nonatomic) NSString *dateBackgroundColor;
+@property(assign, nonatomic) NSNumber *dateCornerRadius;
+
+@property(strong, nonatomic) NSDictionary *eventTextPadding;
+@property(copy, nonatomic) NSString *eventBackgroundColor;
+@property(assign, nonatomic) NSNumber *eventCornerRadius;
+@property(assign, nonatomic) NSNumber *eventTextLineHeight; // TODO:
+@property(copy, nonatomic) NSString *eventTextColor;
+@property(assign, nonatomic) NSNumber *eventTextSize;
+
+@property(assign, nonatomic) NSNumber *displayNameTextSize;
+@property(copy, nonatomic) NSString *displayNameTextColor;
+@property(strong, nonatomic) NSDictionary *displayNamePadding;
+
+@property(assign, nonatomic) NSNumber *messageTextLineHeight;// TODO:
 
 @end

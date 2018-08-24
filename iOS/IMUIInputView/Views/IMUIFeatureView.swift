@@ -29,6 +29,8 @@ public protocol IMUIFeatureViewDelegate: NSObjectProtocol {
   func didRecordVideo(with videoPath: String, durationTime: Double)
   func didSeletedEmoji(with emoji: IMUIEmojiModel)
   func didChangeSelectedGallery(with gallerys: [PHAsset])
+  func cameraFullScreen()
+  func cameraRecoverScreen()
 }
 
 public extension IMUIFeatureViewDelegate {
@@ -38,6 +40,8 @@ public extension IMUIFeatureViewDelegate {
   func didRecordVideo(with videoPath: String, durationTime: Double) {}
   func didSeletedEmoji(with emoji: IMUIEmojiModel) {}
   func didChangeSelectedGallery() {}
+  func cameraFullScreen() {}
+  func cameraRecoverScreen() {}
 }
 
 public protocol IMUIFeatureCellProtocol {
@@ -72,7 +76,7 @@ open class IMUIFeatureView: UIView {
   open override func awakeFromNib() {
     super.awakeFromNib()
     self.setupAllViews()
-    self.addPhotoObserver()
+//    self.addPhotoObserver()
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -83,20 +87,9 @@ open class IMUIFeatureView: UIView {
     
     self.addSubview(view)
     view.frame = self.bounds
-    
-    self.addPhotoObserver()
-  }
-  
-  func addPhotoObserver() {
-    PHPhotoLibrary.requestAuthorization { (status) in
-      if status == .authorized {
-        PHPhotoLibrary.shared().register(self)
-      }
-    }
   }
   
   func setupAllViews() {
-
     let bundle = Bundle.imuiInputViewBundle()
     
     self.featureCollectionView.register(UINib(nibName: "IMUIRecordVoiceCell", bundle: bundle), forCellWithReuseIdentifier: "IMUIRecordVoiceCell")
@@ -164,7 +157,6 @@ open class IMUIFeatureView: UIView {
   }
   
   func clearAllSelectedGallery() {
-    if currentType != .gallery { return }
     IMUIGalleryDataManager.selectedAssets = [PHAsset]()
     self.featureCollectionView.reloadData()
   }
@@ -234,19 +226,5 @@ extension IMUIFeatureView: UICollectionViewDelegate, UICollectionViewDataSource,
   
   func updateSelectedAssets() {
     self.delegate?.didChangeSelectedGallery(with: IMUIGalleryDataManager.selectedAssets)
-  }
-  
-}
-
-extension IMUIFeatureView: PHPhotoLibraryChangeObserver {
-  public func photoLibraryDidChange(_ changeInstance: PHChange) {
-    DispatchQueue.global(qos: .background).async {
-      IMUIGalleryDataManager.updateAssets()
-      
-      DispatchQueue.main.async {
-        self.featureCollectionView.reloadData()
-      }
-    }
-    
   }
 }

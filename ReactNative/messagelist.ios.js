@@ -2,15 +2,15 @@
 
 import React from 'react';
 import ReactNative from 'react-native';
+import PropTypes from 'prop-types';
+import {ViewPropTypes} from 'react-native';
 
 var {
-  PropTypes,
   Component,
 } = React;
 
 var {
   StyleSheet,
-  View,
   requireNativeComponent,
 } = ReactNative;
 
@@ -89,8 +89,7 @@ MessageList.propTypes = {
   onBeginDragMessageList: PropTypes.func,
   onTouchMsgList: PropTypes.func,
   onPullToRefresh: PropTypes.func,
-  sendBubble: PropTypes.string,
-  receiveBubble: PropTypes.string,
+  messageListBackgroundColor: PropTypes.string,
   sendBubble: PropTypes.object,
   receiveBubble: PropTypes.object,
   sendBubbleTextColor: PropTypes.string,
@@ -99,15 +98,29 @@ MessageList.propTypes = {
   receiveBubbleTextSize: PropTypes.number,
   sendBubblePadding: PropTypes.object,
   receiveBubblePadding: PropTypes.object,
-  dateTextSize: PropTypes.number,
-  dateTextColor: PropTypes.string,
   avatarSize: PropTypes.object,
   avatarCornerRadius: PropTypes.number,
   isShowDisplayName: PropTypes.bool,
   isShowIncomingDisplayName: PropTypes.bool,
   isShowOutgoingDisplayName: PropTypes.bool,
   isAllowPullToRefresh: PropTypes.bool,
-  ...View.propTypes
+  dateTextSize: PropTypes.number,
+  dateTextColor: PropTypes.string,
+  datePadding: PropTypes.object,
+  dateBackgroundColor: PropTypes.string,
+  dateCornerRadius: PropTypes.number,
+  eventTextPadding: PropTypes.object,
+  eventBackgroundColor: PropTypes.string,
+  eventTextColor: PropTypes.string,
+  eventTextSize: PropTypes.number,
+  eventCornerRadius: PropTypes.number,
+  displayNameTextSize: PropTypes.number,
+  displayNameTextColor: PropTypes.string,
+  displayNamePadding: PropTypes.object,
+
+  eventTextLineHeight: PropTypes.number, //TODO:
+  messageTextLineHeight: PropTypes.number, //TODO:
+  ...ViewPropTypes
 };
 
 var RCTMessageList = requireNativeComponent('RCTMessageListView', MessageList);

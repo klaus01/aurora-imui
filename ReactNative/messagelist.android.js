@@ -2,17 +2,20 @@
 
 import React from 'react';
 import ReactNative from 'react-native';
+import {ViewPropTypes} from 'react-native';
+import PropTypes from 'prop-types';
 
 var {
-  PropTypes,
   Component,
 } = React;
 
 var {
   StyleSheet,
-  View,
+  UIManager,
+  findNodeHandle,
   requireNativeComponent,
 } = ReactNative;
+const PTR_LAYOUT = "ptr_layout";
 
 export default class MessageList extends Component {
 
@@ -30,28 +33,28 @@ export default class MessageList extends Component {
     if (!this.props.onMsgClick) {
       return;
     }
-    this.props.onMsgClick(event.nativeEvent.message);
+    this.props.onMsgClick(JSON.parse(event.nativeEvent.message));
   }
 
   _onMsgLongClick(event: Event) {
     if (!this.props.onMsgLongClick) {
       return;
     }
-    this.props.onMsgLongClick(event.nativeEvent.message);
+    this.props.onMsgLongClick(JSON.parse(event.nativeEvent.message));
   }
 
   _onAvatarClick(event: Event) {
     if (!this.props.onAvatarClick) {
       return;
     }
-    this.props.onAvatarClick(event.nativeEvent.message);
+    this.props.onAvatarClick(JSON.parse(event.nativeEvent.message));
   }
 
   _onStatusViewClick(event: Event) {
     if (!this.props.onStatusViewClick) {
       return;
     }
-    this.props.onStatusViewClick(event.nativeEvent.message);
+    this.props.onStatusViewClick(JSON.parse(event.nativeEvent.message));
   }
 
   _onTouchMsgList() {
@@ -68,10 +71,15 @@ export default class MessageList extends Component {
     this.props.onPullToRefresh();
   }
 
+  refreshComplete() {
+    UIManager.dispatchViewManagerCommand(findNodeHandle(this.refs[PTR_LAYOUT]), 0, null);
+  }
+
   render() {
     return (
       <RCTMessageList 
           {...this.props} 
+          ref={PTR_LAYOUT} 
           onMsgClick={this._onMsgClick}
           onAvatarClick={this._onAvatarClick}
           onMsgLongClick={this._onMsgLongClick}
@@ -85,6 +93,7 @@ export default class MessageList extends Component {
 }
 
 MessageList.propTypes = {
+  messageListBackgroundColor: PropTypes.string,
   onMsgClick: PropTypes.func,
   onMsgLongClick: PropTypes.func,
   onAvatarClick: PropTypes.func,
@@ -101,17 +110,31 @@ MessageList.propTypes = {
   receiveBubblePadding: PropTypes.object,
   dateTextSize: PropTypes.number,
   dateTextColor: PropTypes.string,
-  datePadding: PropTypes.number,
+  datePadding: PropTypes.object,
+  dateBackgroundColor: PropTypes.string,
+  dateCornerRadius: PropTypes.number,
   avatarSize: PropTypes.object,
   isShowDisplayName: PropTypes.bool,
-  eventMsgTxtColor: PropTypes.string,
-  eventMsgTxtPadding: PropTypes.number,
-  eventMsgTxtSize: PropTypes.number,
+  eventTextColor: PropTypes.string,
+  eventTextPadding: PropTypes.object,
+  eventBackgroundColor: PropTypes.string,
+  eventCornerRadius: PropTypes.number,
+  eventTextLineHeight: PropTypes.number,
+  eventTextSize: PropTypes.number,
   avatarCornerRadius: PropTypes.number,
   isShowIncomingDisplayName: PropTypes.bool,
   isShowOutgoingDisplayName: PropTypes.bool,
+  displayNameTextSize: PropTypes.number,
+  displayNameTextColor: PropTypes.string,
+  displayNamePadding: PropTypes.object,
   isAllowPullToRefresh: PropTypes.bool,
-  ...View.propTypes
+  maxBubbleWidth: PropTypes.number,
+  messageTextLineHeight: PropTypes.number,
+  videoMessageRadius: PropTypes.number,
+  videoDurationTextColor: PropTypes.string,
+  videoDurationTextSize: PropTypes.string,
+  photoMessageRadius: PropTypes.number,
+  ...ViewPropTypes
 };
 
 var RCTMessageList = requireNativeComponent('RCTMessageList', MessageList);

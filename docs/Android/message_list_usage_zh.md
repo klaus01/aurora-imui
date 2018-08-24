@@ -9,7 +9,7 @@
 - Gradle
 
 ```groovy
-compile 'cn.jiguang.imui:messagelist:0.4.8'
+compile 'cn.jiguang.imui:messagelist:0.7.2'
 ```
 
 - Maven
@@ -17,7 +17,7 @@ compile 'cn.jiguang.imui:messagelist:0.4.8'
 <dependency>
   <groupId>cn.jiguang.imui</groupId>
   <artifactId>messagelist</artifactId>
-  <version>0.4.8</version>
+  <version>0.7.2</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,7 +34,7 @@ allprojects {
 
 // module/build.gradle
 dependencies {
-  compile 'com.github.jpush:imui:0.5.2'
+  compile 'com.github.jpush:imui:0.7.7'
 }
 ```
 
@@ -60,21 +60,93 @@ dependencies {
     app:sendTextColor="#7587A8"
     app:sendTextSize="18sp" />
 ```
+
+
+#### 支持下拉刷新布局
+
+如果需要使用下拉刷新的消息列表，可以使用 `PullToRefreshLayout` 来包裹 `MessageList`，此外还需要实现下拉刷新的接口。用法如下：
+
+```
+<cn.jiguang.imui.messages.ptr.PullToRefreshLayout
+    android:id="@+id/pull_to_refresh_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:PtrCloseDuration="300"
+    app:PtrCloseHeaderDuration="2000"
+    app:PtrKeepHeaderWhenRefresh="true"
+    app:PtrPullToRefresh="true"
+    app:PtrRatioHeightToRefresh="1.2"
+    app:PtrResistance="1.2"
+    android:layout_above="@+id/chat_input"
+    android:layout_below="@+id/title_container">
+
+    <cn.jiguang.imui.messages.MessageList
+        android:id="@+id/msg_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:avatarHeight="48dp"
+        app:avatarWidth="48dp"
+        app:showReceiverDisplayName="true"
+        app:showSenderDisplayName="false"
+        app:avatarRadius="5dp"
+        app:bubbleMaxWidth="0.70"
+        app:dateTextSize="14sp"
+        app:receiveBubblePaddingLeft="16dp"
+        app:receiveBubblePaddingRight="8dp"
+        app:receiveTextColor="#ffffff"
+        app:receiveTextSize="14sp"
+        app:sendBubblePaddingLeft="8dp"
+        app:sendBubblePaddingRight="16dp"
+        app:sendTextColor="#7587A8"
+        app:sendTextSize="14sp" />
+
+</cn.jiguang.imui.messages.ptr.PullToRefreshLayout>
+```
+
+定义了 xml 后，添加 Header View，并实现下拉刷新接口：
+
+```
+final PullToRefreshLayout ptrLayout = (PullToRefreshLayout) findViewById(R.id.pull_to_refresh_layout);
+PtrDefaultHeader header = new PtrDefaultHeader(getContext());
+int[] colors = getResources().getIntArray(R.array.google_colors);
+header.setColorSchemeColors(colors);
+header.setLayoutParams(new LayoutParams(-1, -2));
+header.setPadding(0, DisplayUtil.dp2px(getContext(),15), 0,DisplayUtil.dp2px(getContext(),10));
+header.setPtrFrameLayout(ptrLayout);
+ptrLayout.setLoadingMinTime(1000);
+ptrLayout.setDurationToCloseHeader(1500);
+ptrLayout.setHeaderView(header);
+ptrLayout.addPtrUIHandler(header);
+// 如果设置为 true，下拉刷新时，内容固定，只有 Header 变化
+ptrLayout.setPinContent(true);
+ptrLayout.setPtrHandler(new PtrHandler() {
+  @Override
+  public void onRefreshBegin(PullToRefreshLayout layout) {
+      Log.i("MessageListActivity", "Loading next page");
+      loadNextPage();
+      // 加载完历史消息后调用
+      ptrLayout.refreshComplete();
+  }
+});
+```
+
+`PullToRefreshLayout` 默认的 Header 是 Material 风格的，你也可以参考 [android-Ultra-Pull-To-Refresh](https://github.com/liaohuqiu/android-Ultra-Pull-To-Refresh) 来实现各种风格的 Header。
+
 我们定义了很多样式，供用户调整布局，详细的属性可以参考 [attrs.xml](./../../Android/messagelist/src/main/res/values/attrs.xml) 文件，当然也支持完全自定义布局，下面会介绍到。
 
 #### 设置 MessageList 自定义属性
 
-基本上所有的属性都支持在 xml 或在代码中设置，用户可自行选择。下面展示一下如何设置是否显示昵称。
+基本上所有的属性都支持在 xml 或在代码中设置，用户可自行选择。所有可以设置的自定义属性可以参考 [attrs.xml](/../../Android/messagelist/src/main/res/values/attrs.xml). 下面展示一下如何设置是否显示昵称。
 
 ```Java
 MessageList messageList = (MessageList) findViewById(R.id.msg_list);
 ```
 
-- 设置接收方或者发送方显示昵称，可以在上面的 xml 中设置 `showReceiverDisplayName` 及 `showSenderDisplayName` 为 1 或者 0. 1 表示展示昵称，0 为不展示。也可以在代码中设置：
+- 设置接收方或者发送方显示昵称，可以在上面的 xml 中设置 `showReceiverDisplayName` 及 `showSenderDisplayName` 为 true 或者 false. true 表示展示昵称，false 为不展示。也可以在代码中设置：
 
   ```Java
-  messageList.setShowSenderDisplayName(1);
-  messageList.setShowReceiverDisplayName(1);
+  messageList.setShowSenderDisplayName(true);
+  messageList.setShowReceiverDisplayName(true);
   ```
 
 - 禁止下拉刷新（0.4.8 新增接口），调用 `messageList.forbidScrollToRefresh(true)` 即可
@@ -107,12 +179,12 @@ public class MyMessage implements IMessage {
     private long id;
     private String text;
     private String timeString;
-    private MessageType type;
+    private int type;
     private IUser user;
     private String contentFile;
     private long duration;
 
-    public MyMessage(String text, MessageType type) {
+    public MyMessage(String text, int type) {
         this.text = text;
         this.type = type;
         this.id = UUID.randomUUID().getLeastSignificantBits();
@@ -158,7 +230,7 @@ public class MyMessage implements IMessage {
     }
 
     @Override
-    public MessageType getType() {
+    public int getType() {
         return type;
     }
 
@@ -215,13 +287,20 @@ public class DefaultUser implements IUser {
 adapter.addToStart(message, true);
 ```
 
-- *addToEnd(List<IMessage> messages)*
+- addToEndChronologically(List<IMessage> messages)（**0.7.2 后新增**）
+
 ```java
-// 在消息列表的顶部加入消息，消息列表应当按日期增序存放。
+// 在消息列表顶部插入消息，参数列表按照时间顺序排序(最后一条消息是最新的)。
+adapter.addToEndChronologically(messages);
+```
+
+- addToEnd(List<IMessage> messages)
+```java
+// 在消息列表的顶部加入消息，消息列表应当按日期降序存放（第一条消息是最新的）。
 adapter.addToEnd(messages);
 ```
 
-- 滚动列表加载历史消息
+- 滚动列表加载历史消息（**注意：如果使用了 `PullToRefreshLayout` 跳过这个部分**）
   设置监听 `OnLoadMoreListener`，当滚动列表时就会触发 `onLoadMore` 事件，例如：
 ```java
 mAdapter.setOnLoadMoreListener(new MsgListAdapter.OnLoadMoreListener() {
@@ -279,11 +358,11 @@ mAdapter.setOnAvatarClickListener(new MsgListAdapter.OnAvatarClickListener<MyMes
 });
 ```
 
-- *OnMsgLongClickListener*: 长按消息触发
+- *OnMsgLongClickListener*: 长按消息触发（0.6.4 后增加参数 View）
 ```java
 mAdapter.setMsgLongClickListener(new MsgListAdapter.OnMsgLongClickListener<MyMessage>() {
     @Override
-    public void onMessageLongClick(MyMessage message) {
+    public void onMessageLongClick(View view,MyMessage message) {
         // do something
     }
 });
@@ -298,3 +377,14 @@ mAdapter.setMsgStatusViewClickListener(new MsgListAdapter.OnMsgStatusViewClickLi
     }
  });
 ```
+
+
+
+### 混淆
+
+如果需要混淆代码，需要添加如下配置：
+
+```
+-keep class cn.jiguang.imui.** { *; }
+```
+

@@ -11,7 +11,7 @@ Provides several ways to add dependency, you can choose one of them:
 
 - Via Gradle
 ```groovy
-compile 'cn.jiguang.imui:chatinput:0.4.8'
+compile 'cn.jiguang.imui:chatinput:0.7.3'
 ```
 
 - Via Maven
@@ -20,7 +20,7 @@ compile 'cn.jiguang.imui:chatinput:0.4.8'
 <dependency>
   <groupId>cn.jiguang.imui</groupId>
   <artifactId>chatinput</artifactId>
-  <version>0.4.8</version>
+  <version>0.7.3</version>
   <type>pom</type>
 </dependency>
 ```
@@ -41,7 +41,7 @@ allprojects {
 
 ```groovy
 dependencies {
-  compile 'com.github.jpush:imui:0.5.3'
+  compile 'com.github.jpush:imui:0.7.6'
 }
 ```
 
@@ -72,16 +72,16 @@ ChatInputView chatInputView = (ChatInputView) findViewById(R.id.chat_input);
 chatInputView.setMenuContainerHeight(softInputHeight);
 ```
 
-Attention please, **MUST** set MenuContainer's height after init ChatInputView. Best suggestion: get
-soft keyboard height from other activity(Like login Activity), then set soft keyboard height via:
+**Attention please, for perfect display, MUST set MenuContainer's height after init ChatInputView. If using RN, set `ChatInput`'s  `MenuContainerHeight` property instead.** 
+
+Best suggestion: get soft keyboard height from other activity(Like login Activity, just before chat Activity), then set soft keyboard height via:
+
 ```java
 ChatInputView chatinput = (ChatInputView) findViewById(R.id.chat_input);
 chatinput.setMenuContainerHeight(softKeyboardHeight);
 ```
 
 As for how to get soft keyboard height, you can listen `onSizeChanged` method.
-Please [refer onSizeChanged in sample's MessageListActivity](./../sample/exampleui/src/main/java/imui/jiguang/cn/imuisample/messages/MessageListActivity.java#L340),
-and [onSizedChanged in sample's ChatView](./../sample/exampleui/src/main/java/imui/jiguang/cn/imuisample/views/ChatView.java#L102).
 
 
 ## Import interface and event
@@ -172,6 +172,24 @@ mRecordVoiceBtn.setRecordVoiceListener(new RecordVoiceListener() {
     public void onCancelRecord() {
 
     }
+    
+     /**
+      * In preview record voice layout, fires when click cancel button
+      * Add since 0.7.3
+      */
+    @Override
+    public void onPreviewCancel() {
+    }
+
+    
+    /**
+     * In preview record voice layout, fires when click send button
+     * Add since chatinput 0.7.3
+     */
+    @Override
+    public void onPreviewSend() {
+		
+    }
 });
 ```
 
@@ -212,7 +230,38 @@ mChatInput.setOnCameraCallbackListener(new OnCameraCallbackListener() {
 });
 ```
 
+
+
+#### CameraControllerListener
+
+Control camera interface, include full screen event, switch take picture/ record video event, close camera event, etc.
+
+```
+mChatInput.setCameraControllerListener(new CameraControllerListener() {
+            @Override
+            public void onFullScreenClick() {
+               
+            }
+
+            @Override
+            public void onRecoverScreenClick() {
+               
+            }
+
+            @Override
+            public void onCloseCameraClick() {
+                
+            }
+
+            @Override
+            public void onSwitchCameraModeClick(boolean isRecordVideoMode) {
+                // Judge is take picture mode or record video mode by isRecordVideoMode.
+        });
+```
+
+
 #### Set file path and file name that after taken picture(Deprecated since 0.4.5)
+
 setCameraCaptureFile(String path, String fileName)
 
 Since 0.4.5, take picture will return default path.
@@ -223,3 +272,6 @@ Since 0.4.5, take picture will return default path.
 // Deprecated since 0.4.5
 mChatInput.setCameraCaptureFile(path, fileName);
 ```
+
+
+

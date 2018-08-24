@@ -29,7 +29,7 @@ class IMUICameraCell: UICollectionViewCell, IMUIFeatureCellProtocol {
   
   @IBOutlet weak var cameraView: IMUICameraView!
   
-  open var cameraVC = UIViewController() // use to present full size mode viewcontroller
+  open var cameraVC = IMUIHidenStatusViewController() // use to present full size mode viewcontroller
   var isFullScreenMode = false
   var isActivity = true
   var featureDelegate: IMUIFeatureViewDelegate?
@@ -57,14 +57,17 @@ class IMUICameraCell: UICollectionViewCell, IMUIFeatureCellProtocol {
         if self.isFullScreenMode {
           self.shrinkDownScreen()
           self.isFullScreenMode = false
+          
         } else {
           self.setFullScreenMode()
           self.isFullScreenMode = true
+          
         }
     }
   }
   
   func setFullScreenMode() {
+    self.featureDelegate?.cameraFullScreen()
     let rootVC = UIApplication.shared.delegate?.window??.rootViewController
     self.cameraView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
     self.cameraVC.view = self.cameraView
@@ -73,6 +76,7 @@ class IMUICameraCell: UICollectionViewCell, IMUIFeatureCellProtocol {
   }
   
   func shrinkDownScreen() {
+    self.featureDelegate?.cameraRecoverScreen()
     self.cameraVC.dismiss(animated: false, completion: {
       print("\(self.contentView)")
       self.contentView.addSubview(self.cameraView)

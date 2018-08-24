@@ -1,4 +1,4 @@
-[![tag](https://img.shields.io/badge/tag-0.2.0-blue.svg)](https://github.com/jpush/imui/releases)
+[![tag](https://img.shields.io/badge/tag-0.7.0-blue.svg)](https://github.com/jpush/imui/releases)
 [![support](https://img.shields.io/badge/support-iOS%20%26%20Android-brightgreen.svg)]()
 [![QQ Group](https://img.shields.io/badge/QQ%20Group-604798367-red.svg)]()
 
@@ -10,7 +10,9 @@ Aurora IMUI 是个通用的即时通讯（IM）UI 库，不特定于任何 IM SD
 
 本 UI 库提供了消息列表、输入视图等常用组件，支持常见的消息类型：文字、图片、语音、视频等。默认包含多套界面风格，也能根据自己的需要自定义。
 
-同步支持 Android、iOS 平台。计划支持 React Native。
+同步支持 Android、iOS 和 React Native。
+
+更多 demo 可以参考 [aurora-imui-examples](https://github.com/jpush/aurora-imui-examples).
 
 <p align="center">
     <a target="_blank">
@@ -36,6 +38,7 @@ Aurora IMUI 是个通用的即时通讯（IM）UI 库，不特定于任何 IM SD
 - 图片
 - 语音
 - 视频
+- 自定义
 
 ## 使用
 当前提供的组件：

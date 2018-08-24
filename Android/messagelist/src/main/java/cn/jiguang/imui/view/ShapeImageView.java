@@ -30,19 +30,20 @@ public class ShapeImageView extends android.support.v7.widget.AppCompatImageView
 
     public ShapeImageView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(attrs);
+        init(context, attrs);
     }
 
     public ShapeImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(attrs);
+        init(context, attrs);
     }
 
-    private void init(AttributeSet attrs) {
+    private void init(Context context, AttributeSet attrs) {
         setLayerType(LAYER_TYPE_HARDWARE, null);
         if (attrs != null) {
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.MessageList);
-            mRadius = a.getDimension(R.styleable.MessageList_videomessage_radius, 0);
+            mRadius = a.getDimensionPixelSize(R.styleable.MessageList_photoMessageRadius,
+                    context.getResources().getDimensionPixelSize(R.dimen.aurora_radius_photo_message));
             a.recycle();
         }
         mPaint = new Paint();
@@ -72,5 +73,10 @@ public class ShapeImageView extends android.support.v7.widget.AppCompatImageView
             mShape.draw(canvas, mPaint);
         }
         canvas.restoreToCount(saveCount);
+    }
+
+    public void setBorderRadius(int radius) {
+        this.mRadius = radius;
+        invalidate();
     }
 }

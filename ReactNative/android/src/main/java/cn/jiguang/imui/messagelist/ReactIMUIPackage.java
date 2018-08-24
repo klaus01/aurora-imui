@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import cn.jiguang.imui.messagelist.viewmanager.ReactChatInputManager;
+import cn.jiguang.imui.messagelist.viewmanager.ReactMsgListManager;
+
 /**
  * Created by caiyaoguan on 2017/5/24.
  */

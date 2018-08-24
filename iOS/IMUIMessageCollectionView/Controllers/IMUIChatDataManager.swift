@@ -45,7 +45,7 @@ class IMUIChatDataManager: NSObject {
     self.allMsgidArr.append(message.msgId)
     self.allMessageDic[message.msgId] = message
   }
-    
+  
   open func appendMessages(with messages: [IMUIMessageProtocol]) {
     for element in messages {
         self.appendMessage(with: element)
@@ -72,6 +72,10 @@ class IMUIChatDataManager: NSObject {
     }
   }
   
+  func removeAllMessages() {
+    allMessageDic.removeAll()
+    allMsgidArr.removeAll()
+  }
   
   func insertMessage(with message: IMUIMessageProtocol) {
     if message.msgId == "" {

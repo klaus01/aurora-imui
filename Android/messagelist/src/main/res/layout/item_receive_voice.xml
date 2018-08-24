@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/aurora_msgitem_receive_style">
 
-    <TextView
+    <cn.jiguang.imui.view.RoundTextView
         android:id="@+id/aurora_tv_msgitem_date"
         style="@style/aurora_msgitem_date_style" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
+        android:layout_marginTop="10dp">
 
         <cn.jiguang.imui.view.RoundImageView
             android:id="@+id/aurora_iv_msgitem_avatar"
@@ -53,7 +53,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|right"
-                android:layout_marginRight="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
                 android:text="3'"
                 android:textColor="@color/white"
                 android:textSize="12sp" />

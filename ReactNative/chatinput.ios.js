@@ -2,15 +2,15 @@
 
 import React from 'react';
 import ReactNative from 'react-native';
+import PropTypes from 'prop-types';
+import {ViewPropTypes} from 'react-native';
 
 var {
-  PropTypes,
   Component,
 } = React;
 
 var {
   StyleSheet,
-  View,
   requireNativeComponent,
 } = ReactNative;
 
@@ -31,6 +31,9 @@ export default class ChatInput extends Component {
     this._onSwitchGalleryMode = this._onSwitchGalleryMode.bind(this);
     this._onSwitchToCameraMode = this._onSwitchToCameraMode.bind(this);
     this._onShowKeyboard = this._onShowKeyboard.bind(this);
+    this._onSizeChange = this._onSizeChange.bind(this);
+    this._onFullScreen = this._onFullScreen.bind(this);
+		this._onRecoverScreen = this._onRecoverScreen.bind(this);
   }
 
   _onSendText(event: Event) {
@@ -51,7 +54,7 @@ export default class ChatInput extends Component {
     if (!this.props.onTakePicture) {
       return;
     }
-    this.props.onTakePicture(event.nativeEvent.mediaPath);
+    this.props.onTakePicture(event.nativeEvent);
   }
 
   _startVideoRecord() {
@@ -65,7 +68,7 @@ export default class ChatInput extends Component {
     if (!this.props.onFinishRecordVideo) {
       return;
     }
-    this.props.onFinishRecordVideo(event.nativeEvent.mediaPath,event.nativeEvent.durationTime);
+    this.props.onFinishRecordVideo(event.nativeEvent);
   }
 
   _onStartRecordVoice() {
@@ -125,6 +128,27 @@ export default class ChatInput extends Component {
     this.props.onShowKeyboard(event.nativeEvent.keyboard_height);
   }
 
+  _onSizeChange(event: Event) {
+    if (!this.props.onSizeChange) {
+      return;
+    }
+
+    this.props.onSizeChange(event.nativeEvent);
+  }
+
+  _onFullScreen() {
+		if (!this.props.onFullScreen) {
+			return;
+		}
+		this.props.onFullScreen();
+	}
+
+	_onRecoverScreen() {
+		if (!this.props.onRecoverScreen) {
+			return;
+		}
+		this.props.onRecoverScreen();
+	}
 
   render() {
     return (
@@ -143,6 +167,9 @@ export default class ChatInput extends Component {
           onSwitchToGalleryMode={this._onSwitchGalleryMode}
           onSwitchToCameraMode={this._onSwitchToCameraMode}
           onShowKeyboard={this._onShowKeyboard}
+          onSizeChange={this._onSizeChange}
+          onFullScreen={this._onFullScreen}
+          onRecoverScreen={this._onRecoverScreen}
       />
     );
   }
@@ -150,6 +177,7 @@ export default class ChatInput extends Component {
 }
 
 ChatInput.propTypes = {
+  chatInputBackgroupColor: PropTypes.string,
   menuContainerHeight: PropTypes.number,
   onSendText: PropTypes.func,
   onSendGalleryFiles: PropTypes.func,
@@ -164,7 +192,15 @@ ChatInput.propTypes = {
   onSwitchToGalleryMode: PropTypes.func,
   onSwitchToCameraMode: PropTypes.func,
   onShowKeyboard: PropTypes.func,
-  ...View.propTypes
+  onSizeChange: PropTypes.func,
+  onFullScreen: PropTypes.func,
+	onRecoverScreen: PropTypes.func,
+  galleryScale: PropTypes.number,
+  compressionQuality: PropTypes.number,
+  inputPadding: PropTypes.object,
+	inputTextColor: PropTypes.string,
+	inputTextSize: PropTypes.number,
+  ...ViewPropTypes
 };
 
 var RCTChatInput = requireNativeComponent('RCTInputView', ChatInput);

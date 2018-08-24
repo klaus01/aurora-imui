@@ -51,7 +51,7 @@ import UIKit
    *  Tells the delegate when messageCollection beginDragging
    */
   @objc optional func messageCollectionView(_ willBeginDragging: UICollectionView)
-    
+  
   @objc optional func messageCollectionViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool)
   @objc optional func messageCollectionViewDidEndDecelerating(_ scrollView: UIScrollView)
     

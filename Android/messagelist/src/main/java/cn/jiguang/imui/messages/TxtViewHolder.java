@@ -1,5 +1,6 @@
 package cn.jiguang.imui.messages;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -11,13 +12,14 @@ import cn.jiguang.imui.BuildConfig;
 import cn.jiguang.imui.R;
 import cn.jiguang.imui.commons.models.IMessage;
 import cn.jiguang.imui.view.RoundImageView;
+import cn.jiguang.imui.view.RoundTextView;
 
 public class TxtViewHolder<MESSAGE extends IMessage>
         extends BaseMessageViewHolder<MESSAGE>
         implements MsgListAdapter.DefaultMessageViewHolder {
 
     private TextView mMsgTv;
-    private TextView mDateTv;
+    private RoundTextView mDateTv;
     private TextView mDisplayNameTv;
     private RoundImageView mAvatarIv;
     private ImageButton mResendIb;
@@ -28,7 +30,7 @@ public class TxtViewHolder<MESSAGE extends IMessage>
         super(itemView);
         this.mIsSender = isSender;
         mMsgTv = (TextView) itemView.findViewById(R.id.aurora_tv_msgitem_message);
-        mDateTv = (TextView) itemView.findViewById(R.id.aurora_tv_msgitem_date);
+        mDateTv = (RoundTextView) itemView.findViewById(R.id.aurora_tv_msgitem_date);
         mAvatarIv = (RoundImageView) itemView.findViewById(R.id.aurora_iv_msgitem_avatar);
         if (isSender) {
             mDisplayNameTv = (TextView) itemView.findViewById(R.id.aurora_tv_msgitem_sender_display_name);
@@ -42,8 +44,11 @@ public class TxtViewHolder<MESSAGE extends IMessage>
     @Override
     public void onBind(final MESSAGE message) {
         mMsgTv.setText(message.getText());
-        if (message.getTimeString() != null) {
-            mDateTv.setText(message.getTimeString());
+        String timeString = message.getTimeString();
+        if (timeString != null && !TextUtils.isEmpty(timeString)) {
+            mDateTv.setText(timeString);
+        } else {
+            mDateTv.setVisibility(View.GONE);
         }
         boolean isAvatarExists = message.getFromUser().getAvatarFilePath() != null
                 && !message.getFromUser().getAvatarFilePath().isEmpty();
@@ -96,7 +101,7 @@ public class TxtViewHolder<MESSAGE extends IMessage>
             @Override
             public boolean onLongClick(View view) {
                 if (mMsgLongClickListener != null) {
-                    mMsgLongClickListener.onMessageLongClick(message);
+                    mMsgLongClickListener.onMessageLongClick(view, message);
                 } else {
                     if (BuildConfig.DEBUG) {
                         Log.w("MsgListAdapter", "Didn't set long click listener! Drop event.");
@@ -119,6 +124,7 @@ public class TxtViewHolder<MESSAGE extends IMessage>
     @Override
     public void applyStyle(MessageListStyle style) {
         mMsgTv.setMaxWidth((int) (style.getWindowWidth() * style.getBubbleMaxWidth()));
+        mMsgTv.setLineSpacing(style.getLineSpacingExtra(), style.getLineSpacingMultiplier());
         if (mIsSender) {
             mMsgTv.setBackground(style.getSendBubbleDrawable());
             mMsgTv.setTextColor(style.getSendBubbleTextColor());
@@ -133,7 +139,7 @@ public class TxtViewHolder<MESSAGE extends IMessage>
             if (style.getSendingIndeterminateDrawable() != null) {
                 mSendingPb.setIndeterminateDrawable(style.getSendingIndeterminateDrawable());
             }
-            if (style.getShowSenderDisplayName() == 1) {
+            if (style.getShowSenderDisplayName()) {
                 mDisplayNameTv.setVisibility(View.VISIBLE);
             } else {
                 mDisplayNameTv.setVisibility(View.GONE);
@@ -146,14 +152,22 @@ public class TxtViewHolder<MESSAGE extends IMessage>
                     style.getReceiveBubblePaddingTop(),
                     style.getReceiveBubblePaddingRight(),
                     style.getReceiveBubblePaddingBottom());
-            if (style.getShowReceiverDisplayName() == 1) {
+            if (style.getShowReceiverDisplayName()) {
                 mDisplayNameTv.setVisibility(View.VISIBLE);
             } else {
                 mDisplayNameTv.setVisibility(View.GONE);
             }
         }
+        mDisplayNameTv.setTextSize(style.getDisplayNameTextSize());
+        mDisplayNameTv.setTextColor(style.getDisplayNameTextColor());
+        mDisplayNameTv.setPadding(style.getDisplayNamePaddingLeft(), style.getDisplayNamePaddingTop(),
+                style.getDisplayNamePaddingRight(), style.getDisplayNamePaddingBottom());
         mDateTv.setTextSize(style.getDateTextSize());
         mDateTv.setTextColor(style.getDateTextColor());
+        mDateTv.setPadding(style.getDatePaddingLeft(), style.getDatePaddingTop(),
+                style.getDatePaddingRight(), style.getDatePaddingBottom());
+        mDateTv.setBgCornerRadius(style.getDateBgCornerRadius());
+        mDateTv.setBgColor(style.getDateBgColor());
 
         android.view.ViewGroup.LayoutParams layoutParams = mAvatarIv.getLayoutParams();
         layoutParams.width = style.getAvatarWidth();

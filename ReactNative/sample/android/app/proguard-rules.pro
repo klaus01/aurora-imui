@@ -23,3 +23,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.facebook.react.devsupport.** { *; }
+-keep class cn.jiguang.imui.** { *; }
+-dontwarn com.facebook.react.devsupport.**
+-dontwarn com.bumptech.glide.**
+-keep class okio.Okio.** { *; }
+-dontwarn okio.**
+-dontwarn okhttp3.**

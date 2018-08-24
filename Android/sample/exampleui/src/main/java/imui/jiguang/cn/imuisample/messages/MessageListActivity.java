@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,11 +20,13 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -30,7 +34,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -42,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cn.jiguang.imui.chatinput.ChatInputView;
+import cn.jiguang.imui.chatinput.listener.CameraControllerListener;
 import cn.jiguang.imui.chatinput.listener.OnCameraCallbackListener;
 import cn.jiguang.imui.chatinput.listener.OnClickEditTextListener;
 import cn.jiguang.imui.chatinput.listener.OnMenuClickListener;
@@ -51,6 +62,8 @@ import cn.jiguang.imui.chatinput.model.VideoItem;
 import cn.jiguang.imui.commons.ImageLoader;
 import cn.jiguang.imui.commons.models.IMessage;
 import cn.jiguang.imui.messages.MsgListAdapter;
+import cn.jiguang.imui.messages.ptr.PtrHandler;
+import cn.jiguang.imui.messages.ptr.PullToRefreshLayout;
 import cn.jiguang.imui.messages.ViewHolderController;
 import imui.jiguang.cn.imuisample.R;
 import imui.jiguang.cn.imuisample.models.DefaultUser;
@@ -59,8 +72,8 @@ import imui.jiguang.cn.imuisample.views.ChatView;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MessageListActivity extends Activity implements ChatView.OnKeyboardChangedListener,
-        ChatView.OnSizeChangedListener, View.OnTouchListener, EasyPermissions.PermissionCallbacks, SensorEventListener {
+public class MessageListActivity extends Activity implements View.OnTouchListener,
+        EasyPermissions.PermissionCallbacks, SensorEventListener {
 
     private final static String TAG = "MessageListActivity";
     private final int RC_RECORD_VOICE = 0x0001;
@@ -78,12 +91,17 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
     private Sensor mSensor;
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;
+    /**
+     * Store all image messages' path, pass it to {@link BrowserImageActivity},
+     * so that click image message can browser all images.
+     */
+    private ArrayList<String> mPathList = new ArrayList<>();
+    private ArrayList<String> mMsgIdList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.chat_activity);
-
+        setContentView(R.layout.activity_chat);
         this.mImm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         mWindow = getWindow();
         registerProximitySensorListener();
@@ -96,8 +114,6 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(mReceiver, intentFilter);
-        mChatView.setKeyboardChangedListener(this);
-        mChatView.setOnSizeChangedListener(this);
         mChatView.setOnTouchListener(this);
         mChatView.setMenuClickListener(new OnMenuClickListener() {
             @Override
@@ -105,9 +121,10 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
                 if (input.length() == 0) {
                     return false;
                 }
-                MyMessage message = new MyMessage(input.toString(), IMessage.MessageType.SEND_TEXT);
+                MyMessage message = new MyMessage(input.toString(), IMessage.MessageType.SEND_TEXT.ordinal());
                 message.setUserInfo(new DefaultUser("1", "Ironman", "R.drawable.ironman"));
                 message.setTimeString(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
+                message.setMessageStatus(IMessage.MessageStatus.SEND_GOING);
                 mAdapter.addToStart(message, true);
                 return true;
             }
@@ -121,10 +138,11 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
                 MyMessage message;
                 for (FileItem item : list) {
                     if (item.getType() == FileItem.Type.Image) {
-                        message = new MyMessage(null, IMessage.MessageType.SEND_IMAGE);
-
+                        message = new MyMessage(null, IMessage.MessageType.SEND_IMAGE.ordinal());
+                        mPathList.add(item.getFilePath());
+                        mMsgIdList.add(message.getMsgId());
                     } else if (item.getType() == FileItem.Type.Video) {
-                        message = new MyMessage(null, IMessage.MessageType.SEND_VIDEO);
+                        message = new MyMessage(null, IMessage.MessageType.SEND_VIDEO.ordinal());
                         message.setDuration(((VideoItem) item).getDuration());
 
                     } else {
@@ -173,6 +191,8 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
                             getResources().getString(R.string.rationale_photo),
                             RC_PHOTO, perms);
                 }
+                // If you call updateData, select photo view will try to update data(Last update over 30 seconds.)
+                mChatView.getChatInputView().getSelectPhotoView().updateData();
                 return true;
             }
 
@@ -220,7 +240,7 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
 
             @Override
             public void onFinishRecord(File voiceFile, int duration) {
-                MyMessage message = new MyMessage(null, IMessage.MessageType.SEND_VOICE);
+                MyMessage message = new MyMessage(null, IMessage.MessageType.SEND_VOICE.ordinal());
                 message.setUserInfo(new DefaultUser("1", "Ironman", "R.drawable.ironman"));
                 message.setMediaFilePath(voiceFile.getPath());
                 message.setDuration(duration);
@@ -232,14 +252,34 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
             public void onCancelRecord() {
 
             }
+
+            /**
+             * In preview record voice layout, fires when click cancel button
+             * Add since chatinput v0.7.3
+             */
+            @Override
+            public void onPreviewCancel() {
+
+            }
+
+            /**
+             * In preview record voice layout, fires when click send button
+             * Add since chatinput v0.7.3
+             */
+            @Override
+            public void onPreviewSend() {
+
+            }
         });
 
         mChatView.setOnCameraCallbackListener(new OnCameraCallbackListener() {
             @Override
             public void onTakePictureCompleted(String photoPath) {
-                final MyMessage message = new MyMessage(null, IMessage.MessageType.SEND_IMAGE);
+                final MyMessage message = new MyMessage(null, IMessage.MessageType.SEND_IMAGE.ordinal());
                 message.setTimeString(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
                 message.setMediaFilePath(photoPath);
+                mPathList.add(photoPath);
+                mMsgIdList.add(message.getMsgId());
                 message.setUserInfo(new DefaultUser("1", "Ironman", "R.drawable.ironman"));
                 MessageListActivity.this.runOnUiThread(new Runnable() {
                     @Override
@@ -265,10 +305,19 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
             }
         });
 
-        mChatView.setOnTouchEditTextListener(new OnClickEditTextListener() {
+        mChatView.getChatInputView().getInputView().setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onTouchEditText() {
-//                mAdapter.getLayoutManager().scrollToPosition(0);
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                scrollToBottom();
+                return false;
+            }
+        });
+
+        mChatView.getSelectAlbumBtn().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MessageListActivity.this, "OnClick select album button",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -348,7 +397,6 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
     }
 
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -374,20 +422,24 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
         for (int i = 0; i < messages.length; i++) {
             MyMessage message;
             if (i % 2 == 0) {
-                message = new MyMessage(messages[i], IMessage.MessageType.RECEIVE_TEXT);
+                message = new MyMessage(messages[i], IMessage.MessageType.RECEIVE_TEXT.ordinal());
                 message.setUserInfo(new DefaultUser("0", "DeadPool", "R.drawable.deadpool"));
             } else {
-                message = new MyMessage(messages[i], IMessage.MessageType.SEND_TEXT);
+                message = new MyMessage(messages[i], IMessage.MessageType.SEND_TEXT.ordinal());
                 message.setUserInfo(new DefaultUser("1", "IronMan", "R.drawable.ironman"));
             }
             message.setTimeString(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
             list.add(message);
         }
-        Collections.reverse(list);
         return list;
     }
 
     private void initMsgAdapter() {
+        final float density = getResources().getDisplayMetrics().density;
+        final float MIN_WIDTH = 60 * density;
+        final float MAX_WIDTH = 200 * density;
+        final float MIN_HEIGHT = 60 * density;
+        final float MAX_HEIGHT = 200 * density;
         ImageLoader imageLoader = new ImageLoader() {
             @Override
             public void loadAvatarImage(ImageView avatarImageView, String string) {
@@ -398,22 +450,96 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
 
                     avatarImageView.setImageResource(resId);
                 } else {
-                    Glide.with(getApplicationContext())
+                    Glide.with(MessageListActivity.this)
                             .load(string)
-                            .placeholder(R.drawable.aurora_headicon_default)
+                            .apply(new RequestOptions().placeholder(R.drawable.aurora_headicon_default))
                             .into(avatarImageView);
                 }
             }
 
+            /**
+             * Load image message
+             * @param imageView Image message's ImageView.
+             * @param string A file path, or a uri or url.
+             */
             @Override
-            public void loadImage(ImageView imageView, String string) {
+            public void loadImage(final ImageView imageView, String string) {
                 // You can use other image load libraries.
                 Glide.with(getApplicationContext())
+                        .asBitmap()
                         .load(string)
-                        .fitCenter()
-                        .placeholder(R.drawable.aurora_picture_not_found)
-                        .override(400, Target.SIZE_ORIGINAL)
-                        .into(imageView);
+                        .apply(new RequestOptions().fitCenter().placeholder(R.drawable.aurora_picture_not_found))
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                int imageWidth = resource.getWidth();
+                                int imageHeight = resource.getHeight();
+                                Log.d(TAG, "Image width " + imageWidth + " height: " + imageHeight);
+
+                                // 裁剪 bitmap
+                                float width, height;
+                                if (imageWidth > imageHeight) {
+                                    if (imageWidth > MAX_WIDTH) {
+                                        float temp = MAX_WIDTH / imageWidth * imageHeight;
+                                        height = temp > MIN_HEIGHT ? temp : MIN_HEIGHT;
+                                        width = MAX_WIDTH;
+                                    } else if (imageWidth < MIN_WIDTH) {
+                                        float temp = MIN_WIDTH / imageWidth * imageHeight;
+                                        height = temp < MAX_HEIGHT ? temp : MAX_HEIGHT;
+                                        width = MIN_WIDTH;
+                                    } else {
+                                        float ratio = imageWidth / imageHeight;
+                                        if (ratio > 3) {
+                                            ratio = 3;
+                                        }
+                                        height = imageHeight * ratio;
+                                        width = imageWidth;
+                                    }
+                                } else {
+                                    if (imageHeight > MAX_HEIGHT) {
+                                        float temp = MAX_HEIGHT / imageHeight * imageWidth;
+                                        width = temp > MIN_WIDTH ? temp : MIN_WIDTH;
+                                        height = MAX_HEIGHT;
+                                    } else if (imageHeight < MIN_HEIGHT) {
+                                        float temp = MIN_HEIGHT / imageHeight * imageWidth;
+                                        width = temp < MAX_WIDTH ? temp : MAX_WIDTH;
+                                        height = MIN_HEIGHT;
+                                    } else {
+                                        float ratio = imageHeight / imageWidth;
+                                        if (ratio > 3) {
+                                            ratio = 3;
+                                        }
+                                        width = imageWidth * ratio;
+                                        height = imageHeight;
+                                    }
+                                }
+                                ViewGroup.LayoutParams params = imageView.getLayoutParams();
+                                params.width = (int) width;
+                                params.height = (int) height;
+                                imageView.setLayoutParams(params);
+                                Matrix matrix = new Matrix();
+                                float scaleWidth = width / imageWidth;
+                                float scaleHeight = height / imageHeight;
+                                matrix.postScale(scaleWidth, scaleHeight);
+                                imageView.setImageBitmap(Bitmap.createBitmap(resource, 0, 0, imageWidth, imageHeight, matrix, true));
+                            }
+                        });
+            }
+
+            /**
+             * Load video message
+             * @param imageCover Video message's image cover
+             * @param uri Local path or url.
+             */
+            @Override
+            public void loadVideo(ImageView imageCover, String uri) {
+                long interval = 5000 * 1000;
+                Glide.with(MessageListActivity.this)
+                        .asBitmap()
+                        .load(uri)
+                        // Resize image view by change override size.
+                        .apply(new RequestOptions().frame(interval).override(200, 400))
+                        .into(imageCover);
             }
         };
 
@@ -430,13 +556,20 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
             @Override
             public void onMessageClick(MyMessage message) {
                 // do something
-                if (message.getType() == IMessage.MessageType.RECEIVE_VIDEO
-                        || message.getType() == IMessage.MessageType.SEND_VIDEO) {
+                if (message.getType() == IMessage.MessageType.RECEIVE_VIDEO.ordinal()
+                        || message.getType() == IMessage.MessageType.SEND_VIDEO.ordinal()) {
                     if (!TextUtils.isEmpty(message.getMediaFilePath())) {
                         Intent intent = new Intent(MessageListActivity.this, VideoActivity.class);
                         intent.putExtra(VideoActivity.VIDEO_PATH, message.getMediaFilePath());
                         startActivity(intent);
                     }
+                } else if (message.getType() == IMessage.MessageType.RECEIVE_IMAGE.ordinal()
+                        || message.getType() == IMessage.MessageType.SEND_IMAGE.ordinal()) {
+                    Intent intent = new Intent(MessageListActivity.this, BrowserImageActivity.class);
+                    intent.putExtra("msgId", message.getMsgId());
+                    intent.putStringArrayListExtra("pathList", mPathList);
+                    intent.putStringArrayListExtra("idList", mMsgIdList);
+                    startActivity(intent);
                 } else {
                     Toast.makeText(getApplicationContext(),
                             getApplicationContext().getString(R.string.message_click_hint),
@@ -447,7 +580,7 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
 
         mAdapter.setMsgLongClickListener(new MsgListAdapter.OnMsgLongClickListener<MyMessage>() {
             @Override
-            public void onMessageLongClick(MyMessage message) {
+            public void onMessageLongClick(View view, MyMessage message) {
                 Toast.makeText(getApplicationContext(),
                         getApplicationContext().getString(R.string.message_long_click_hint),
                         Toast.LENGTH_SHORT).show();
@@ -473,19 +606,43 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
             }
         });
 
-        MyMessage message = new MyMessage("Hello World", IMessage.MessageType.RECEIVE_TEXT);
+        MyMessage message = new MyMessage("Hello World", IMessage.MessageType.RECEIVE_TEXT.ordinal());
         message.setUserInfo(new DefaultUser("0", "Deadpool", "R.drawable.deadpool"));
         mAdapter.addToStart(message, true);
-        MyMessage eventMsg = new MyMessage("haha", IMessage.MessageType.EVENT);
+        MyMessage voiceMessage = new MyMessage("", IMessage.MessageType.RECEIVE_VOICE.ordinal());
+        voiceMessage.setUserInfo(new DefaultUser("0", "Deadpool", "R.drawable.deadpool"));
+        voiceMessage.setMediaFilePath(Environment.getExternalStorageDirectory().getAbsolutePath() + "/voice/2018-02-28-105103.m4a");
+        voiceMessage.setDuration(4);
+        mAdapter.addToStart(voiceMessage, true);
+
+        MyMessage sendVoiceMsg = new MyMessage("", IMessage.MessageType.SEND_VOICE.ordinal());
+        sendVoiceMsg.setUserInfo(new DefaultUser("1", "Ironman", "R.drawable.ironman"));
+        sendVoiceMsg.setMediaFilePath(Environment.getExternalStorageDirectory().getAbsolutePath() + "/voice/2018-02-28-105103.m4a");
+        sendVoiceMsg.setDuration(4);
+        mAdapter.addToStart(sendVoiceMsg, true);
+        MyMessage eventMsg = new MyMessage("haha", IMessage.MessageType.EVENT.ordinal());
         mAdapter.addToStart(eventMsg, true);
-        mAdapter.addToEnd(mData);
+
+        MyMessage receiveVideo = new MyMessage("", IMessage.MessageType.RECEIVE_VIDEO.ordinal());
+        receiveVideo.setMediaFilePath(Environment.getExternalStorageDirectory().getPath() + "/Pictures/Hangouts/video-20170407_135638.3gp");
+        receiveVideo.setDuration(4);
+        receiveVideo.setUserInfo(new DefaultUser("0", "Deadpool", "R.drawable.deadpool"));
+        mAdapter.addToStart(receiveVideo, true);
+        mAdapter.addToEndChronologically(mData);
+        PullToRefreshLayout layout = mChatView.getPtrLayout();
+        layout.setPtrHandler(new PtrHandler() {
+            @Override
+            public void onRefreshBegin(PullToRefreshLayout layout) {
+                Log.i("MessageListActivity", "Loading next page");
+                loadNextPage();
+            }
+        });
+        // Deprecated, should use onRefreshBegin to load next page
         mAdapter.setOnLoadMoreListener(new MsgListAdapter.OnLoadMoreListener() {
             @Override
             public void onLoadMore(int page, int totalCount) {
-                if (totalCount <= mData.size()) {
-                    Log.i("MessageListActivity", "Loading next page");
-                    loadNextPage();
-                }
+//                Log.i("MessageListActivity", "Loading next page");
+//                loadNextPage();
             }
         });
 
@@ -497,46 +654,36 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mAdapter.addToEnd(mData);
-            }
-        }, 1000);
-    }
-
-    @Override
-    public void onKeyBoardStateChanged(int state) {
-        switch (state) {
-            case ChatInputView.KEYBOARD_STATE_INIT:
-                ChatInputView chatInputView = mChatView.getChatInputView();
-                if (mImm != null) {
-                    mImm.isActive();
-                }
-                if (chatInputView.getMenuState() == View.INVISIBLE
-                        || (!chatInputView.getSoftInputState()
-                        && chatInputView.getMenuState() == View.GONE)) {
-
-                    mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-                            | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                List<MyMessage> list = new ArrayList<>();
+                Resources res = getResources();
+                String[] messages = res.getStringArray(R.array.conversation);
+                for (int i = 0; i < messages.length; i++) {
+                    MyMessage message;
+                    if (i % 2 == 0) {
+                        message = new MyMessage(messages[i], IMessage.MessageType.RECEIVE_TEXT.ordinal());
+                        message.setUserInfo(new DefaultUser("0", "DeadPool", "R.drawable.deadpool"));
+                    } else {
+                        message = new MyMessage(messages[i], IMessage.MessageType.SEND_TEXT.ordinal());
+                        message.setUserInfo(new DefaultUser("1", "IronMan", "R.drawable.ironman"));
                     }
-                    chatInputView.dismissMenuLayout();
+                    message.setTimeString(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
+                    list.add(message);
                 }
-                break;
-        }
+//                Collections.reverse(list);
+                // MessageList 0.7.2 add this method, add messages chronologically.
+                mAdapter.addToEndChronologically(list);
+                mChatView.getPtrLayout().refreshComplete();
+            }
+        }, 1500);
     }
 
     private void scrollToBottom() {
-        mAdapter.getLayoutManager().scrollToPosition(0);
-    }
-
-    @Override
-    public void onSizeChanged(int w, int h, int oldw, int oldh) {
-        if (oldh - h > 300) {
-            mChatView.setMenuHeight(oldh - h);
-        }
-        scrollToBottom();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mChatView.getMessageListView().smoothScrollToPosition(0);
+            }
+        }, 200);
     }
 
     @Override
@@ -544,17 +691,6 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 ChatInputView chatInputView = mChatView.getChatInputView();
-
-                if (view.getId() == chatInputView.getInputView().getId()) {
-
-                    if (chatInputView.getMenuState() == View.VISIBLE
-                            && !chatInputView.getSoftInputState()) {
-                        chatInputView.dismissMenuAndResetSoftMode();
-                        return false;
-                    } else {
-                        return false;
-                    }
-                }
                 if (chatInputView.getMenuState() == View.VISIBLE) {
                     chatInputView.dismissMenuLayout();
                 }
@@ -562,14 +698,15 @@ public class MessageListActivity extends Activity implements ChatView.OnKeyboard
                     View v = getCurrentFocus();
                     if (mImm != null && v != null) {
                         mImm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-                                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+                        mWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
                         view.clearFocus();
-                        chatInputView.setSoftInputState(false);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+            case MotionEvent.ACTION_UP:
+                view.performClick();
                 break;
         }
         return false;

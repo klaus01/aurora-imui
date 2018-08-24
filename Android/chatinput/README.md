@@ -5,14 +5,14 @@
 这是一个聊天界面输入框组件，可以方便地结合 `MessageList` 使用，包含录音，选择图片，拍照等功能，提供了一些丰富的接口和回调供用户使用，
 还可以选择自定义样式。
 
-> 该组件依赖了 Glide 3.7.0
+> 该组件依赖了 Glide 3.8.0
 
 ## 集成
 提供了以下几种方式添加依赖，只需要选择其中一种即可。
 
 - Gradle
 ```groovy
-compile 'cn.jiguang.imui:chatinput:0.4.8'
+compile 'cn.jiguang.imui:chatinput:0.7.3'
 ```
 
 - Maven
@@ -20,7 +20,7 @@ compile 'cn.jiguang.imui:chatinput:0.4.8'
 <dependency>
   <groupId>cn.jiguang.imui</groupId>
   <artifactId>chatinput</artifactId>
-  <version>0.4.8</version>
+  <version>0.7.3</version>
   <type>pom</type>
 </dependency>
 ```
@@ -42,7 +42,7 @@ compile 'cn.jiguang.imui:chatinput:0.4.8'
 
   ```groovy
   dependencies {
-    compile 'com.github.jpush:imui:0.5.3'
+    compile 'com.github.jpush:imui:0.7.6'
   }
   ```
 
@@ -71,10 +71,9 @@ ChatInputView chatInputView = (ChatInputView) findViewById(R.id.chat_input);
 chatInputView.setMenuContainerHeight(softInputHeight);
 ```
 
-  **初始化后一定要设置一下 MenuContainer 的高度，最好设置为软键盘的高度，否则会导致第一次打开菜单时高度不正常（此时打开软键盘会导致界面伸缩）。**
+  **初始化后一定要设置一下 MenuContainer 的高度，最好设置为软键盘的高度，否则会导致第一次打开菜单时高度不正常（此时打开软键盘会导致界面伸缩）。 如果使用 RN，设置 `ChatInput` 的 `menuContainerHeight` 属性即可。 **
 
-  建议在跳转到聊天界面之前使用 onSizeChanged 方法监听软键盘的高度，然后在初始化的时候设置即可，
-  关于监听软键盘高度的方法可以参考 sample 下的 MessageListActivity 及 ChatView 中的 onSizeChanged 相关方法。
+  建议在跳转到聊天界面之前使用 onSizeChanged 方法监听软键盘的高度，然后在初始化的时候设置即可。
 
 ## 重要接口及事件
 ChatInputView 提供了各种按钮及事件的监听回调，所以用户可以灵活地运用监听事件做一些操作，如发送消息等事件。
@@ -164,6 +163,24 @@ mRecordVoiceBtn.setRecordVoiceListener(new RecordVoiceListener() {
     public void onCancelRecord() {
 
     }
+    
+    /**
+     * 录音试听界面，点击取消按钮触发
+     * 0.7.3 后添加此事件
+     */
+    @Override
+    public void onPreviewCancel() {
+        
+    }
+
+    /**
+     * 录音试听界面，点击发送按钮触发
+     * 0.7.3 后增加此事件
+     */
+    @Override
+    public void onPreviewSend() {
+
+    }
 });
 ```
 
@@ -199,10 +216,45 @@ mChatInput.setOnCameraCallbackListener(new OnCameraCallbackListener() {
     public void onCancelVideoRecord() {
 
     }
+    
 });
 ```
 
+
+
+#### CameraControllerListener
+
+相机控制相关接口，包括全屏、拍照与录制视频切换、关闭相机等事件。
+
+```
+mChatInput.setCameraControllerListener(new CameraControllerListener() {
+            @Override
+            public void onFullScreenClick() {
+               
+            }
+
+            @Override
+            public void onRecoverScreenClick() {
+               
+            }
+
+            @Override
+            public void onCloseCameraClick() {
+                
+            }
+
+            @Override
+            public void onSwitchCameraModeClick(boolean isRecordVideoMode) {
+                // 切换拍照与否，通过 isRecordVideoMode 判断
+        });
+```
+
+
+
+
+
 ### 设置拍照后保存的文件(0.4.5 版本后弃用)
+
 `setCameraCaptureFile(String path, String fileName)`
 
 0.4.5 版本后拍照会返回默认路径。
@@ -212,3 +264,4 @@ mChatInput.setOnCameraCallbackListener(new OnCameraCallbackListener() {
 // 0.4.5 后弃用
 mChatInput.setCameraCaptureFile(path, fileName);
 ```
+

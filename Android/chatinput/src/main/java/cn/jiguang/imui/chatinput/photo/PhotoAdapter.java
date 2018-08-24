@@ -79,7 +79,6 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
         FileItem item = mMedias.get(position);
         Glide.with(mContext)
                 .load(item.getFilePath())
-                .placeholder(R.drawable.aurora_picture_not_found)
                 .into(holder.ivPhoto);
 
         if (mSelectedItems.contains(position)) {    // Current photo is selected
@@ -100,8 +99,8 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
 
             long duration = ((VideoItem) item).getDuration();
             String durationStr = String.format(Locale.CHINA, "%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes(duration),
-                    TimeUnit.MILLISECONDS.toSeconds(duration));
+                    TimeUnit.SECONDS.toMinutes(duration),
+                    TimeUnit.SECONDS.toSeconds(duration));
 
             holder.tvDuration.setText(durationStr);
         }

@@ -3,11 +3,13 @@ package cn.jiguang.imui.messages;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,12 +52,12 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
     // Custom message
     private final int TYPE_CUSTOM_SEND_MSG = 11;
     private final int TYPE_CUSTOM_RECEIVE_MSG = 12;
+    private SparseArray<CustomMsgConfig> mCustomMsgList;
 
     private Context mContext;
     private String mSenderId;
     private HoldersConfig mHolders;
     private OnLoadMoreListener mListener;
-
     private ImageLoader mImageLoader;
     private boolean mIsSelectedMode;
     private OnMsgClickListener<MESSAGE> mMsgClickListener;
@@ -123,7 +125,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_SEND_TXT:
                 return getHolder(parent, mHolders.mSendTxtLayout, mHolders.mSendTxtHolder, true);
@@ -147,11 +149,30 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
                 return getHolder(parent, mHolders.mReceiveVideoLayout, mHolders.mReceiveVideoHolder, false);
             case TYPE_EVENT:
                 return getHolder(parent, mHolders.mEventLayout, mHolders.mEventMsgHolder, true);
-            case TYPE_CUSTOM_SEND_MSG:
-                return getHolder(parent, mHolders.mCustomSendMsgLayout, mHolders.mCustomSendMsgHolder, true);
             default:
-                return getHolder(parent, mHolders.mCustomReceiveMsgLayout, mHolders.mCustomReceiveMsgHolder, false);
+                if (mCustomMsgList != null && mCustomMsgList.size() > 0) {
+                    return getHolder(parent, mCustomMsgList.get(viewType).getResourceId(),
+                            mCustomMsgList.get(viewType).getClazz(), mCustomMsgList.get(viewType).getIsSender());
+                }
+                return getHolder(parent, mHolders.mSendTxtLayout, mHolders.mSendLocationHolder, false);
         }
+    }
+
+    /**
+     * Specify custom message config, include view type, layout resource id, is send outgoing(according to layout)
+     * and custom view holder's {@link Class} object.
+     * @param viewType View type, must not set 0-12, otherwise will throw IllegalArgumentException
+     * @param bean {@link CustomMsgConfig}
+     */
+    public void addCustomMsgType(int viewType, CustomMsgConfig bean) {
+        if (mCustomMsgList == null) {
+            mCustomMsgList = new SparseArray<>();
+        }
+        mCustomMsgList.put(viewType, bean);
+    }
+
+    public SparseArray<CustomMsgConfig> getCustomMsgList() {
+        return mCustomMsgList;
     }
 
     @Override
@@ -159,36 +180,45 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
         Wrapper wrapper = mItems.get(position);
         if (wrapper.item instanceof IMessage) {
             IMessage message = (IMessage) wrapper.item;
-            switch (message.getType()) {
-                case SEND_TEXT:
-                    return TYPE_SEND_TXT;
-                case RECEIVE_TEXT:
-                    return TYPE_RECEIVE_TXT;
-                case SEND_LOCATION:
-                    return TYPE_SEND_LOCATION;
-                case RECEIVE_LOCATION:
-                    return TYPE_RECEIVER_LOCATION;
-                case SEND_VOICE:
-                    return TYPE_SEND_VOICE;
-                case RECEIVE_VOICE:
-                    return TYPE_RECEIVER_VOICE;
-                case SEND_IMAGE:
-                    return TYPE_SEND_IMAGE;
-                case RECEIVE_IMAGE:
-                    return TYPE_RECEIVER_IMAGE;
-                case SEND_VIDEO:
-                    return TYPE_SEND_VIDEO;
-                case RECEIVE_VIDEO:
-                    return TYPE_RECEIVE_VIDEO;
-                case EVENT:
-                    return TYPE_EVENT;
-                case SEND_CUSTOM:
-                    return TYPE_CUSTOM_SEND_MSG;
-                default:
-                    return TYPE_CUSTOM_RECEIVE_MSG;
+            if (message.getType() == IMessage.MessageType.EVENT.ordinal()) {
+                return TYPE_EVENT;
+            } else if (message.getType() == IMessage.MessageType.SEND_TEXT.ordinal()) {
+                return TYPE_SEND_TXT;
+            } else if (message.getType() == IMessage.MessageType.RECEIVE_TEXT.ordinal()) {
+                return TYPE_RECEIVE_TXT;
+            } else if (message.getType() == IMessage.MessageType.SEND_IMAGE.ordinal()) {
+                return TYPE_SEND_IMAGE;
+            } else if (message.getType() == IMessage.MessageType.RECEIVE_IMAGE.ordinal()) {
+                return TYPE_RECEIVER_IMAGE;
+            } else if (message.getType() == IMessage.MessageType.SEND_VOICE.ordinal()) {
+                return TYPE_SEND_VOICE;
+            } else if (message.getType() == IMessage.MessageType.RECEIVE_VOICE.ordinal()) {
+                return TYPE_RECEIVER_VOICE;
+            } else if (message.getType() == IMessage.MessageType.SEND_VIDEO.ordinal()) {
+                return TYPE_SEND_VIDEO;
+            } else if (message.getType() == IMessage.MessageType.RECEIVE_VIDEO.ordinal()) {
+                return TYPE_RECEIVE_VIDEO;
+            } else if (message.getType() == IMessage.MessageType.SEND_LOCATION.ordinal()) {
+                return TYPE_SEND_LOCATION;
+            } else if (message.getType() == IMessage.MessageType.RECEIVE_LOCATION.ordinal()) {
+                return TYPE_RECEIVER_LOCATION;
+            } else {
+                return getCustomType(message);
             }
         }
-        return TYPE_CUSTOM_SEND_MSG;
+        return TYPE_SEND_TXT;
+    }
+
+    private int getCustomType(IMessage message) {
+        for (int i=0; i < mCustomMsgList.size(); i++) {
+            CustomMsgConfig config = mCustomMsgList.valueAt(i);
+            if (message.getType() == config.getViewType()) {
+                return config.getViewType();
+            }
+        }
+        Log.d("MsgListAdapter", "Can not find custom type, maybe you are forget to call " +
+                "setType() in your <? extends IMessage> class");
+        return TYPE_SEND_TXT;
     }
 
     private <HOLDER extends ViewHolder> ViewHolder getHolder(ViewGroup parent, @LayoutRes int layout,
@@ -225,6 +255,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
             ((BaseMessageViewHolder) holder).mMsgStatusViewClickListener = this.mMsgStatusViewClickListener;
             ((BaseMessageViewHolder) holder).mMediaPlayer = this.mMediaPlayer;
             ((BaseMessageViewHolder) holder).mScroll = this.mScroll;
+            ((BaseMessageViewHolder) holder).mData = this.mItems;
         }
         holder.onBind(wrapper.item);
     }
@@ -234,12 +265,28 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
         return mItems.size();
     }
 
-    private class Wrapper<DATA> {
+    public class Wrapper<DATA> {
         private DATA item;
         boolean isSelected;
 
         Wrapper(DATA item) {
             this.item = item;
+        }
+
+        public DATA getItem() {
+            return this.item;
+        }
+
+        public boolean getIsSelected() {
+            return this.isSelected;
+        }
+
+        public void setItem(DATA item) {
+            this.item = item;
+        }
+
+        public void setSelected(boolean isSelected) {
+            this.isSelected = isSelected;
         }
     }
 
@@ -259,13 +306,29 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
     }
 
     /**
-     * Add messages chronologically, to load last page of messages from history, use this method.
+     * Add messages to end, the messages in list are in descending order.
+     * For example: messages[0].timeString > messages[1].timeString.
+     * To load last page of messages from history, use this method.
      *
      * @param messages Last page of messages.
      */
     public void addToEnd(List<MESSAGE> messages) {
         int oldSize = mItems.size();
         for (int i = 0; i < messages.size(); i++) {
+            MESSAGE message = messages.get(i);
+            mItems.add(new Wrapper<>(message));
+        }
+        notifyItemRangeInserted(oldSize, mItems.size() - oldSize);
+    }
+
+    /**
+     * If messages in list is sorted chronologically, for example, messages[0].timeString < messages[1].timeString.
+     * To load last page of messages from history, use this method.
+     * @param messages Last page of messages.
+     */
+    public void addToEndChronologically(List<MESSAGE> messages) {
+        int oldSize = mItems.size();
+        for (int i = messages.size() - 1; i >= 0; i--) {
             MESSAGE message = messages.get(i);
             mItems.add(new Wrapper<>(message));
         }
@@ -394,6 +457,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
      */
     public void clear() {
         mItems.clear();
+        notifyDataSetChanged();
     }
 
     /**
@@ -525,7 +589,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
             @Override
             public boolean onLongClick(View view) {
                 if (mSelectionListener == null) {
-                    notifyMessageLongClicked(wrapper.item);
+                    notifyMessageLongClicked(view, wrapper.item);
                     return true;
                 } else {
                     mIsSelectedMode = true;
@@ -536,9 +600,9 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
         };
     }
 
-    private void notifyMessageLongClicked(MESSAGE message) {
+    private void notifyMessageLongClicked(View view, MESSAGE message) {
         if (mMsgLongClickListener != null) {
-            mMsgLongClickListener.onMessageLongClick(message);
+            mMsgLongClickListener.onMessageLongClick(view, message);
         }
     }
 
@@ -574,6 +638,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
         void applyStyle(MessageListStyle style);
     }
 
+    @Deprecated
     public interface OnLoadMoreListener {
         void onLoadMore(int page, int totalCount);
     }
@@ -597,7 +662,7 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
      * @param <MESSAGE>
      */
     public interface OnMsgLongClickListener<MESSAGE extends IMessage> {
-        void onMessageLongClick(MESSAGE message);
+        void onMessageLongClick(View view, MESSAGE message);
     }
 
     public interface OnAvatarClickListener<MESSAGE extends IMessage> {
@@ -856,12 +921,14 @@ public class MsgListAdapter<MESSAGE extends IMessage> extends RecyclerView.Adapt
             this.mReceiveVideoLayout = layout;
         }
 
+        @Deprecated
         public void setSendCustomMsg(Class<? extends BaseMessageViewHolder<? extends IMessage>> holder,
                                      @LayoutRes int layout) {
             this.mCustomSendMsgHolder = holder;
             this.mCustomSendMsgLayout = layout;
         }
 
+        @Deprecated
         public void setReceiveCustomMsg(Class<? extends BaseMessageViewHolder<? extends IMessage>> holder,
                                         @LayoutRes int layout) {
             this.mCustomReceiveMsgHolder = holder;

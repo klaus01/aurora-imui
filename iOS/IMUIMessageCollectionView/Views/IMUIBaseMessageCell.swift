@@ -15,13 +15,15 @@ enum IMUIMessageCellType {
 }
 
 open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
-  @objc open static var avatarCornerRadius:CGFloat = 0
+  @objc open static var avatarCornerRadius: CGFloat = 0
+  @objc open static var backgroundColor: UIColor = UIColor.init(netHex: 0xE7EBEF)
+  
   
   var bubbleView: IMUIMessageBubbleView
   lazy var avatarImage = UIImageView()
+  lazy var timeLabel = IMUITextView()
   lazy var nameLabel = UILabel()
   
-  weak var timeLabel: UILabel!
   weak var statusView: UIView?
   weak var bubbleContentView: IMUIMessageContentViewProtocol?
   var bubbleContentType = ""
@@ -36,6 +38,7 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
     
     self.contentView.addSubview(self.bubbleView)
     self.contentView.addSubview(self.avatarImage)
+    self.contentView.addSubview(self.timeLabel)
     self.contentView.addSubview(self.nameLabel)
     avatarImage.layer.masksToBounds = true
     self.avatarImage.layer.cornerRadius = CGFloat(IMUIBaseMessageCell.avatarCornerRadius)
@@ -53,6 +56,19 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
     avatarImage.addGestureRecognizer(avatarGesture)
     
     nameLabel.font = IMUIMessageCellLayout.nameLabelTextFont
+    
+    self.setupSubViews()
+  }
+  
+  fileprivate func setupSubViews() {
+    timeLabel.textAlignment = .center
+    timeLabel.textColor = IMUIMessageCellLayout.timeStringColor
+    timeLabel.font = IMUIMessageCellLayout.timeStringFont
+    timeLabel.backgroundColor = IMUIMessageCellLayout.timeStringBackgroundColor
+    timeLabel.contentInset = IMUIMessageCellLayout.timeLabelPadding
+    timeLabel.layer.cornerRadius = IMUIMessageCellLayout.timeStringCornerRadius
+    timeLabel.layer.masksToBounds = true;
+  
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -60,11 +76,6 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   }
   
   func layoutCell(with layout: IMUIMessageCellLayoutProtocol, viewCache: IMUIReuseViewCache) {
-    if self.timeLabel == nil {
-        let label = layout.timeLabel
-        self.timeLabel = label
-        self.contentView.addSubview(label)
-    }
     self.timeLabel.frame = layout.timeLabelFrame
     self.avatarImage.frame = layout.avatarFrame
     self.bubbleView.frame = layout.bubbleFrame
@@ -123,7 +134,7 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   
   func setupData(with message: IMUIMessageModelProtocol) {
     self.avatarImage.image = message.fromUser.Avatar()
-    self.bubbleView.backgroundColor = UIColor.init(netHex: 0xE7EBEF)
+    self.bubbleView.backgroundColor = IMUIBaseMessageCell.backgroundColor
     self.timeLabel.text = message.timeString
     self.nameLabel.text = message.fromUser.displayName()
     self.bubbleContentView?.layoutContentView(message: message)

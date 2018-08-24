@@ -35,6 +35,19 @@ open class IMUIMessageCollectionView: UIView {
   var chatDataManager = IMUIChatDataManager()
   @objc open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
   
+  open override func awakeFromNib() {
+    super.awakeFromNib()
+  }
+  
+  override open var bounds: CGRect {
+    didSet {
+      IMUIMessageCellLayout.cellWidth = self.imui_width
+      DispatchQueue.main.async {
+        self.messageCollectionView.reloadData()
+      }
+    }
+  }
+  
   override init(frame: CGRect) {
     super.init(frame: frame)
     self.addSubview(messageCollectionView)
@@ -111,6 +124,11 @@ open class IMUIMessageCollectionView: UIView {
   @objc open func removeMessage(with messageId: String) {
     self.chatDataManager.removeMessage(with: messageId)
     self.messageCollectionView.reloadDataNoScroll()
+  }
+  
+  @objc open func removeAllMessages() {
+    self.chatDataManager.removeAllMessages()
+    self.messageCollectionView.reloadData()
   }
   
 }
@@ -214,6 +232,12 @@ public extension UICollectionView {
     
     let deltaHeight = contentSizeAfterInsert.height - contentSizeBeforeInsert.height
     currentOffset.y += (deltaHeight > 0 ? deltaHeight : 0)
+    self.setContentOffset(currentOffset, animated: false)
+  }
+  
+  func reloadDataHorizontalNoScroll() {
+    var currentOffset = self.contentOffset
+    self.reloadData();
     self.setContentOffset(currentOffset, animated: false)
   }
 }

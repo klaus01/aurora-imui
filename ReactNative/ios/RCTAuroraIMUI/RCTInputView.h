@@ -13,8 +13,19 @@
 
 @interface RCTInputView : UIView
 @property (weak, nonatomic) IBOutlet IMUIInputView *imuiIntputView;
+@property (nonatomic, assign)CGFloat inputTextHeight;
+@property (nonatomic, assign)CGFloat keyBoardHeight;
+
+@property (nonatomic, assign)CGFloat maxKeyBoardHeight;
+
+@property(strong, nonatomic) NSString *chatInputBackgroupColor;
+
+@property(strong, nonatomic) NSNumber *galleryScale;
+@property(strong, nonatomic) NSNumber *compressionQuality;
 
 @property (nonatomic, copy) RCTBubblingEventBlock onEventCallBack;
+
+@property (nonatomic, copy) RCTBubblingEventBlock onSizeChange;
 
 @property (nonatomic, copy) RCTBubblingEventBlock onSendText;
 @property (nonatomic, copy) RCTBubblingEventBlock onTakePicture;
@@ -32,4 +43,12 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onSwitchToEmojiMode;
 
 @property (nonatomic, copy) RCTBubblingEventBlock onShowKeyboard;
+
+@property (nonatomic, copy) RCTBubblingEventBlock onFullScreen;
+
+@property (nonatomic, copy) RCTBubblingEventBlock onRecoverScreen;
+
+@property(strong, nonatomic) NSDictionary *inputPadding;
+@property(strong, nonatomic) NSString *inputTextColor;
+@property(strong, nonatomic) NSNumber *inputTextSize;
 @end

@@ -1,6 +1,7 @@
 package cn.jiguang.imui.commons.models;
 
 
+import java.util.HashMap;
 
 public interface IMessage {
 
@@ -48,17 +49,15 @@ public interface IMessage {
         SEND_CUSTOM,
         RECEIVE_CUSTOM;
 
-        public String type;
-
         MessageType() {
         }
     }
 
     /**
-     * Type of message, enum.
-     * @return Message Type
+     * Type of message
+     * @return integer
      */
-    MessageType getType();
+    int getType();
 
     /**
      * Status of message, enum.
@@ -92,9 +91,15 @@ public interface IMessage {
 
     /**
      * If message type is voice or video, get duration through this method.
-     * @return duration of audio or video
+     * @return duration of audio or video, TimeUnit: SECONDS.
      */
     long getDuration();
 
     String getProgress();
+
+    /**
+     * Return extra key value of message
+     * @return {@link HashMap<>}
+     */
+    HashMap<String, String> getExtras();
 }

@@ -25,10 +25,10 @@ public class ChatInputStyle extends Style {
     private String inputHint;
     private int inputHintColor;
 
-    private int inputDefaultPaddingLeft;
-    private int inputDefaultPaddingRight;
-    private int inputDefaultPaddingTop;
-    private int inputDefaultPaddingBottom;
+    private int inputPaddingLeft;
+    private int inputPaddingRight;
+    private int inputPaddingTop;
+    private int inputPaddingBottom;
 
     private int inputCursorDrawable;
 
@@ -43,7 +43,9 @@ public class ChatInputStyle extends Style {
 
     private Drawable sendBtnBg;
     private int sendBtnIcon;
+    private int sendBtnPressedIcon;
     private Drawable sendCountBg;
+    private boolean showSelectAlbumBtn;
 
     public static ChatInputStyle parse(Context context, AttributeSet attrs) {
         ChatInputStyle style = new ChatInputStyle(context, attrs);
@@ -75,14 +77,18 @@ public class ChatInputStyle extends Style {
         style.cameraBtnIcon = typedArray.getResourceId(R.styleable.ChatInputView_cameraBtnIcon, R.drawable.aurora_menuitem_camera);
         style.sendBtnBg = typedArray.getDrawable(R.styleable.ChatInputView_sendBtnBg);
         style.sendBtnIcon = typedArray.getResourceId(R.styleable.ChatInputView_sendBtnIcon, R.drawable.aurora_menuitem_send);
+        style.sendBtnPressedIcon = typedArray.getResourceId(R.styleable.ChatInputView_sendBtnPressedIcon, R.drawable.aurora_menuitem_send_pres);
         style.sendCountBg = typedArray.getDrawable(R.styleable.ChatInputView_sendCountBg);
+        style.showSelectAlbumBtn = typedArray.getBoolean(R.styleable.ChatInputView_showSelectAlbum, true);
+        style.inputPaddingLeft = typedArray.getDimensionPixelSize(R.styleable.ChatInputView_inputPaddingLeft,
+                style.getDimension(R.dimen.aurora_padding_input_left));
+        style.inputPaddingTop = typedArray.getDimensionPixelSize(R.styleable.ChatInputView_inputPaddingTop,
+                style.getDimension(R.dimen.aurora_padding_input_top));
+        style.inputPaddingRight = typedArray.getDimensionPixelSize(R.styleable.ChatInputView_inputPaddingRight,
+                style.getDimension(R.dimen.aurora_padding_input_right));
+        style.inputPaddingBottom = typedArray.getDimensionPixelSize(R.styleable.ChatInputView_inputPaddingBottom,
+                style.getDimension(R.dimen.aurora_padding_input_bottom));
         typedArray.recycle();
-
-        style.inputDefaultPaddingLeft = style.getDimension(R.dimen.aurora_padding_input_left);
-        style.inputDefaultPaddingRight = style.getDimension(R.dimen.aurora_padding_input_right);
-        style.inputDefaultPaddingTop = style.getDimension(R.dimen.aurora_padding_input_top);
-        style.inputDefaultPaddingBottom = style.getDimension(R.dimen.aurora_padding_input_bottom);
-
         return style;
     }
 
@@ -158,6 +164,14 @@ public class ChatInputStyle extends Style {
         return sendBtnIcon;
     }
 
+    public int getSendBtnPressedIcon() {
+        return this.sendBtnPressedIcon;
+    }
+
+    public void setSendBtnPressedIcon(int resId) {
+        this.sendBtnPressedIcon = resId;
+    }
+
     public Drawable getSendBtnBg() {
         return this.sendBtnBg;
     }
@@ -169,19 +183,23 @@ public class ChatInputStyle extends Style {
         return this.sendCountBg;
     }
 
-    public int getInputDefaultPaddingLeft() {
-        return inputDefaultPaddingLeft;
+    public int getInputPaddingLeft() {
+        return inputPaddingLeft;
     }
 
-    public int getInputDefaultPaddingRight() {
-        return inputDefaultPaddingRight;
+    public int getInputPaddingRight() {
+        return inputPaddingRight;
     }
 
-    public int getInputDefaultPaddingTop() {
-        return inputDefaultPaddingTop;
+    public int getInputPaddingTop() {
+        return inputPaddingTop;
     }
 
-    public int getInputDefaultPaddingBottom() {
-        return inputDefaultPaddingBottom;
+    public int getInputPaddingBottom() {
+        return inputPaddingBottom;
+    }
+
+    public boolean getShowSelectAlbum() {
+        return this.showSelectAlbumBtn;
     }
 }

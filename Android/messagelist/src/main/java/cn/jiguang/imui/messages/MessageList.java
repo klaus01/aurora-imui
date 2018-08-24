@@ -90,20 +90,8 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
         mMsgListStyle.setSendBubbleTextColor(color);
     }
 
-    public void setSendBubblePaddingLeft(int paddingLeft) {
-        mMsgListStyle.setSendBubblePaddingLeft(paddingLeft);
-    }
-
-    public void setSendBubblePaddingTop(int paddingTop) {
-        mMsgListStyle.setSendBubblePaddingTop(paddingTop);
-    }
-
-    public void setSendBubblePaddingRight(int paddingRight) {
-        mMsgListStyle.setSendBubblePaddingRight(paddingRight);
-    }
-
-    public void setSendBubblePaddingBottom(int paddingBottom) {
-        mMsgListStyle.setSendBubblePaddingBottom(paddingBottom);
+    public void setSendBubblePadding(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
+        mMsgListStyle.setSendBubblePadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
     }
 
     public void setReceiveBubbleDrawable(int resId) {
@@ -126,20 +114,8 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
         mMsgListStyle.setReceiveBubbleTextColor(color);
     }
 
-    public void setReceiveBubblePaddingLeft(int paddingLeft) {
-        mMsgListStyle.setReceiveBubblePaddingLeft(paddingLeft);
-    }
-
-    public void setReceiveBubblePaddingTop(int paddingTop) {
-        mMsgListStyle.setReceiveBubblePaddingTop(paddingTop);
-    }
-
-    public void setReceiveBubblePaddingRight(int paddingRight) {
-        mMsgListStyle.setReceiveBubblePaddingRight(paddingRight);
-    }
-
-    public void setReceiveBubblePaddingBottom(int paddingBottom) {
-        mMsgListStyle.setReceiveBubblePaddingBottom(paddingBottom);
+    public void setReceiveBubblePadding(int paddingLeft, int paddingTop, int paddingRight, int paddingBottom) {
+        mMsgListStyle.setReceiveBubblePadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
     }
 
     public void setDateTextSize(float size) {
@@ -150,8 +126,16 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
         mMsgListStyle.setDateTextColor(color);
     }
 
-    public void setDatePadding(int padding) {
-        mMsgListStyle.setDatePadding(padding);
+    public void setDatePadding(int left, int top, int right, int bottom) {
+        mMsgListStyle.setDatePadding(left, top, right, bottom);
+    }
+
+    public void setDateBgCornerRadius(int radius) {
+        mMsgListStyle.setDateBgCornerRadius(radius);
+    }
+
+    public void setDateBgColor(int color) {
+        mMsgListStyle.setDateBgColor(color);
     }
 
     public void setEventTextColor(int color) {
@@ -160,10 +144,6 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
 
     public void setEventTextSize(float size) {
         mMsgListStyle.setEventTextSize(size);
-    }
-
-    public void setEventTextPadding(int padding) {
-        mMsgListStyle.setEventTextPadding(padding);
     }
 
     public void setAvatarWidth(int width) {
@@ -178,12 +158,24 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
         mMsgListStyle.setAvatarRadius(radius);
     }
 
-    public void setShowSenderDisplayName(int showDisplayName) {
+    public void setShowSenderDisplayName(boolean showDisplayName) {
         mMsgListStyle.setShowSenderDisplayName(showDisplayName);
     }
 
-    public void setShowReceiverDisplayName(int showDisplayName) {
+    public void setShowReceiverDisplayName(boolean showDisplayName) {
         mMsgListStyle.setShowReceiverDisplayName(showDisplayName);
+    }
+
+    public void setDisplayNameTextSize(float size) {
+        mMsgListStyle.setDisplayNameTextSize(size);
+    }
+
+    public void setDisplayNameTextColor(int color) {
+        mMsgListStyle.setDisplayNameTextColor(color);
+    }
+
+    public void setDisplayNamePadding(int left, int top, int right, int bottom) {
+        mMsgListStyle.setDisplayNamePadding(left, top, right, bottom);
     }
 
     public void setSendVoiceDrawable(int resId) {
@@ -214,6 +206,46 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
     public void setSendingIndeterminateDrawable(String drawableName, String packageName) {
         int resId = getResources().getIdentifier(drawableName, "drawable", packageName);
         mMsgListStyle.setSendingIndeterminateDrawable(getResources().getDrawable(resId));
+    }
+
+    public void setLineSpacingExtra(int spacing) {
+        mMsgListStyle.setLineSpacingExtra(spacing);
+    }
+
+    public void setLineSpacingMultiplier(float mult) {
+        mMsgListStyle.setLineSpacingMultiplier(mult);
+    }
+
+    public void setEventBgColor(int color) {
+        mMsgListStyle.setEventBgColor(color);
+    }
+
+    public void setEventPadding(int left, int top, int right, int bottom) {
+        mMsgListStyle.setEventTextPadding(left, top, right, bottom);
+    }
+
+    public void setEventLineSpacingExtra(int spacingExtra) {
+        mMsgListStyle.setEventLineSpacingExtra(spacingExtra);
+    }
+
+    public void setEventBgCornerRadius(int radius) {
+        mMsgListStyle.setEventBgCornerRadius(radius);
+    }
+
+    public void setVideoDurationTextColor(int color) {
+        mMsgListStyle.setVideoDurationTextColor(color);
+    }
+
+    public void setVideoDurationTextSize(float size) {
+        mMsgListStyle.setVideoDurationTextSize(size);
+    }
+
+    public void setVideoMessageRadius(int radius) {
+        mMsgListStyle.setVideoMessageRadius(radius);
+    }
+
+    public void setPhotoMessageRadius(int radius) {
+        mMsgListStyle.setPhotoMessageRadius(radius);
     }
 
     @Override
@@ -248,4 +280,20 @@ public class MessageList extends RecyclerView implements GestureDetector.OnGestu
         }
         return false;
     }
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+        post(measureAndLayout);
+    }
+
+    private final Runnable measureAndLayout = new Runnable() {
+        @Override
+        public void run() {
+            measure(
+                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+            layout(getLeft(), getTop(), getRight(), getBottom());
+        }
+    };
 }

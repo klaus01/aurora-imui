@@ -7,22 +7,29 @@
         <attr name="dateTextSize" format="dimension|reference"/>
         <attr name="dateTextColor" format="color|reference"/>
         <attr name="dateFormat" format="string|reference"/>
-        <attr name="datePadding" format="dimension|reference"/>
+        <attr name="datePaddingLeft" format="dimension|reference"/>
+        <attr name="datePaddingTop" format="dimension|reference" />
+        <attr name="datePaddingRight" format="dimension|reference" />
+        <attr name="datePaddingBottom" format="dimension|reference" />
+        <attr name="dateBackgroundColor" format="color|reference" />
+        <attr name="dateCornerRadius" format="dimension|reference" />
         <attr name="eventTextSize" format="dimension|reference" />
         <attr name="eventTextColor" format="color|reference" />
-        <attr name="eventPadding" format="dimension|reference" />
+        <attr name="eventPaddingLeft" format="dimension|reference" />
+        <attr name="eventPaddingTop" format="dimension|reference" />
+        <attr name="eventPaddingRight" format="dimension|reference" />
+        <attr name="eventPaddingBottom" format="dimension|reference" />
+        <attr name="eventCornerRadius" format="dimension|reference" />
+        <attr name="eventBackgroundColor" format="color|reference" />
 
         <attr name="avatarWidth" format="dimension|reference"/>
         <attr name="avatarHeight" format="dimension|reference"/>
         <attr name="avatarRadius" format="dimension|reference" />
-        <attr name="showSenderDisplayName" format="integer">
-            <enum name="HIDE" value="0"/>
-            <enum name="SHOW" value="1"/>
-        </attr>
-        <attr name="showReceiverDisplayName" format="integer">
-            <enum name="HIDE" value="0" />
-            <enum name="SHOW" value="1" />
-        </attr>
+        <attr name="showSenderDisplayName" format="boolean" />
+        <attr name="showReceiverDisplayName" format="boolean" />
+        <attr name="displayNameTextSize" format="dimension|reference" />
+        <attr name="displayNameTextColor" format="color|reference" />
+        <attr name="displayNamePadding" format="dimension|reference" />
 
         <attr name="receiveBubbleDrawable" format="reference"/>
         <attr name="receiveBubbleColor" format="color|reference"/>
@@ -53,10 +60,33 @@
         <attr name="receiveVoiceDrawable" format="reference"/>
         <attr name="playSendVoiceAnim" format="reference"/>
         <attr name="playReceiveVoiceAnim" format="reference"/>
+        <attr name="lineSpacingExtra" format="dimension|reference" />
+        <attr name="lineSpacingMultiplier" format="float" />
 
+        <attr name="isOutgoing" format="boolean" />
+        <attr name="bubbleVertexWidth" format="dimension|reference" />
+        <attr name="bubbleHemlineHeight" format="dimension|reference" />
+        <attr name="bubbleVertexY" format="dimension|reference" />
         <attr name="sendPhotoMsgBg" format="reference"/>
         <attr name="receivePhotoMsgBg" format="reference"/>
+        <attr name="photoMessageRadius" format="dimension|reference" />
 
-        <attr name="videomessage_radius" format="dimension|reference"/>
+        <attr name="videoMessageRadius" format="dimension|reference"/>
+        <attr name="videoDurationTextColor" format="color|reference" />
+        <attr name="videoDurationTextSize" format="dimension|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="PullToRefreshLayout">
+        <attr name="PtrResistance" format="float" />
+        <attr name="PtrRatioHeightToRefresh" format="float" />
+        <attr name="PtrCloseDuration" format="integer" />
+        <attr name="PtrCloseHeaderDuration" format="integer" />
+        <attr name="PtrPullToRefresh" format="boolean" />
+        <attr name="PtrKeepHeaderWhenRefresh" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="RoundTextView">
+        <attr name="cornerRadius" format="dimension|reference" />
+        <attr name="backgroundColor" format="color|reference" />
     </declare-styleable>
 </resources>

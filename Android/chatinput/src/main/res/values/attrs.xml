@@ -6,6 +6,10 @@
     <declare-styleable name="ChatInputView">
         <attr name="inputMarginLeft" format="dimension|reference" />
         <attr name="inputMarginRight" format="dimension|reference" />
+        <attr name="inputPaddingLeft" format="dimension|reference" />
+        <attr name="inputPaddingTop" format="dimension|reference" />
+        <attr name="inputPaddingRight" format="dimension|reference" />
+        <attr name="inputPaddingBottom" format="dimension|reference" />
         <attr name="inputEditTextBg" format="reference" />
         <attr name="inputMaxLines" format="integer" />
         <attr name="inputHint" format="string" />
@@ -16,6 +20,7 @@
         <attr name="inputCursorDrawable" format="reference" />
         <attr name="sendBtnBg" format="reference" />
         <attr name="sendBtnIcon" format="reference" />
+        <attr name="sendBtnPressedIcon" format="reference" />
         <attr name="sendCountBg" format="reference" />
         <attr name="voiceBtnBg" format="reference" />
         <attr name="voiceBtnIcon" format="reference" />
@@ -23,6 +28,7 @@
         <attr name="cameraBtnIcon" format="reference" />
         <attr name="photoBtnBg" format="reference" />
         <attr name="photoBtnIcon" format="reference" />
+        <attr name="showSelectAlbum" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="RecordVoiceButton">
@@ -42,9 +48,13 @@
     </declare-styleable>
 
     <declare-styleable name="ProgressButton">
-        <attr name="roundColor" format="color"/>
-        <attr name="roundProgressColor" format="color"/>
+        <attr name="roundColor" format="color" />
+        <attr name="roundProgressColor" format="color" />
         <attr name="roundWidth" format="dimension" />
         <attr name="max" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="EmoticonsIndicatorView">
+        <attr name="bmpNomal" format="reference" />
+        <attr name="bmpSelect" format="reference" />
     </declare-styleable>
 </resources>

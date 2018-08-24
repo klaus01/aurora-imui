@@ -20,13 +20,15 @@
 
 #define kAppendMessages @"kAppendMessage"
 #define kRemoveMessage @"kRemoveMessage"
+#define kRemoveAllMessages @"kRemoveAllMessages"
 #define kInsertMessagesToTop @"kInsertMessagesToTop"
 #define kUpdateMessge @"kUpdateMessge"
 #define kScrollToBottom @"kScrollToBottom"
 #define kScrollToBottom @"kScrollToBottom"
 #define kHidenFeatureView @"kHidenFeatureView"
 #define kMessageListDidLoad @"kMessageListDidLoad"
+#define kLayoutInputView @"kLayoutInputView"
 
 @interface RCTAuroraIMUIModule : NSObject <RCTBridgeModule>
-
++ (NSString *)getPath;
 @end

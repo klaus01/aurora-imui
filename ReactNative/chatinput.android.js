@@ -2,17 +2,23 @@
 
 import React from 'react';
 import ReactNative from 'react-native';
+import PropTypes from 'prop-types';
+import {ViewPropTypes} from 'react-native';
 
 var {
-	PropTypes,
 	Component,
 } = React;
 
 var {
 	StyleSheet,
 	View,
+	Dimensions,
 	requireNativeComponent,
-} = ReactNative;
+	UIManager,
+	findNodeHandle,
+  } = ReactNative;
+
+const CHAT_INPUT = "chat_input";
 
 export default class ChatInput extends Component {
 
@@ -34,6 +40,10 @@ export default class ChatInput extends Component {
 		this._onTouchEditText = this._onTouchEditText.bind(this);
 		this._onFullScreen = this._onFullScreen.bind(this);
 		this._onRecoverScreen = this._onRecoverScreen.bind(this);
+		this._onSizeChange = this._onSizeChange.bind(this);
+		this._onClickSelectAlbum = this._onClickSelectAlbum.bind(this);
+		this._closeCamera = this._closeCamera.bind(this);
+		this._switchCameraMode = this._switchCameraMode.bind(this);
 	}
 
 	_onSendText(event: Event) {
@@ -54,7 +64,7 @@ export default class ChatInput extends Component {
 		if (!this.props.onTakePicture) {
 			return;
 		}
-		this.props.onTakePicture(event.nativeEvent.mediaPath);
+		this.props.onTakePicture(event.nativeEvent);
 	}
 
 	_startVideoRecord() {
@@ -68,7 +78,7 @@ export default class ChatInput extends Component {
 		if (!this.props.onFinishRecordVideo) {
 			return;
 		}
-		this.props.onFinishRecordVideo(event.nativeEvent.mediaPath, event.nativeEvent.duration);
+		this.props.onFinishRecordVideo(event.nativeEvent);
 	}
 
 	_cancelVideoRecord() {
@@ -148,33 +158,82 @@ export default class ChatInput extends Component {
 		this.props.onRecoverScreen();
 	}
 
+	_onSizeChange(event: Event) {
+		if (!this.props.onSizeChange) {
+			return;
+		}
+		this.props.onSizeChange({ width: Dimensions.get('window').width, height: event.nativeEvent.height });
+	}
+
+	_onClickSelectAlbum(event: Event) {
+		if (!this.props.onClickSelectAlbum) {
+			return;
+		}
+		this.props.onClickSelectAlbum();
+	}
+
+	_closeCamera(event: Event) {
+		if (!this.props.closeCamera) {
+			return;
+		}
+		this.props.closeCamera();
+	}
+
+	_switchCameraMode(event: Event) {
+		if (!this.props.switchCameraMode) {
+			return;
+		}
+		this.props.switchCameraMode(event.nativeEvent.isRecordVideoMode);
+	}
+
+	setMenuContainerHeight(height) {
+		UIManager.dispatchViewManagerCommand(findNodeHandle(this.refs[CHAT_INPUT]), 99, [height]);
+	}
+
+	closeSoftInput() {
+		UIManager.dispatchViewManagerCommand(findNodeHandle(this.refs[CHAT_INPUT]), 100, null);
+	}
+
+	getInputText() {
+		UIManager.dispatchViewManagerCommand(findNodeHandle(this.refs[CHAT_INPUT]), 101, null);
+	}
+
+	showMenu(flag) {
+		UIManager.dispatchViewManagerCommand(findNodeHandle(this.refs[CHAT_INPUT]), 102, [flag]);
+	}
+
 	render() {
 		return (
-			<RCTChatInput 
-          {...this.props} 
-          onSendText={this._onSendText}
-          onSendGalleryFiles={this._onSendFiles}
-          onTakePicture={this._takePicture}
-          onStartRecordVideo={this._startVideoRecord}
-          onFinishRecordVideo={this._finishVideoRecord}
-          onCancelRecordVideo={this._cancelVideoRecord}
-          onStartRecordVoice={this._onStartRecordVoice}
-          onFinishRecordVoice={this._onFinishRecordVoice}
-          onCancelRecordVoice={this._onCancelRecordVoice}
-          onSwitchToMicrophoneMode={this._onSwitchToMicrophoneMode}
-          onSwitchToGalleryMode={this._onSwitchGalleryMode}
-          onSwitchToCameraMode={this._onSwitchToCameraMode}
-          onSwitchToEmojiMode={this._onSwitchToEmojiMode}
-          onTouchEditText={this._onTouchEditText}
-          onFullScreen={this._onFullScreen}
-          onRecoverScreen={this._onRecoverScreen}
-      />
+			<RCTChatInput
+				ref={CHAT_INPUT}
+				{...this.props}
+				onSendText={this._onSendText}
+				onSendGalleryFiles={this._onSendFiles}
+				onTakePicture={this._takePicture}
+				onStartRecordVideo={this._startVideoRecord}
+				onFinishRecordVideo={this._finishVideoRecord}
+				onCancelRecordVideo={this._cancelVideoRecord}
+				onStartRecordVoice={this._onStartRecordVoice}
+				onFinishRecordVoice={this._onFinishRecordVoice}
+				onCancelRecordVoice={this._onCancelRecordVoice}
+				onSwitchToMicrophoneMode={this._onSwitchToMicrophoneMode}
+				onSwitchToGalleryMode={this._onSwitchGalleryMode}
+				onSwitchToCameraMode={this._onSwitchToCameraMode}
+				onTouchEditText={this._onTouchEditText}
+				onFullScreen={this._onFullScreen}
+				onRecoverScreen={this._onRecoverScreen}
+				onSizeChange={this._onSizeChange}
+				onClickSelectAlbum={this._onClickSelectAlbum}
+				closeCamera={this._closeCamera}
+				switchCameraMode={this._switchCameraMode}
+			/>
 		);
 	}
 
 }
 
 ChatInput.propTypes = {
+	chatInputBackgroundColor: PropTypes.string,
 	menuContainerHeight: PropTypes.number,
 	isDismissMenuContainer: PropTypes.bool,
 	onSendText: PropTypes.func,
@@ -193,7 +252,18 @@ ChatInput.propTypes = {
 	onTouchEditText: PropTypes.func,
 	onFullScreen: PropTypes.func,
 	onRecoverScreen: PropTypes.func,
-	...View.propTypes
+	onSizeChange: PropTypes.func,
+	closeCamera: PropTypes.func,
+	switchCameraMode: PropTypes.func,
+	inputViewHeight: PropTypes.number,
+	onClickSelectAlbum: PropTypes.func,
+	showSelectAlbumBtn: PropTypes.bool,
+	inputPadding: PropTypes.object,
+	inputTextColor: PropTypes.string,
+	inputTextSize: PropTypes.number,
+	inputTextLineHeight: PropTypes.number,
+	hideCameraButton: PropTypes.bool,
+	...ViewPropTypes
 };
 
 var RCTChatInput = requireNativeComponent('RCTChatInput', ChatInput);

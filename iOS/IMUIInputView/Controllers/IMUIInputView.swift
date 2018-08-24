@@ -23,6 +23,11 @@ fileprivate var IMUIFeatureSelectorHeight:CGFloat = 46
 fileprivate var IMUIShowFeatureViewAnimationDuration = 0.25
 
 open class IMUIInputView: UIView {
+  @objc open var inputTextViewPadding: UIEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+  @objc open var inputTextViewHeightRange: UIFloatRange = UIFloatRange(minimum: 17, maximum: 60)
+  
+  @objc open var inputTextViewTextColor: UIColor = UIColor(netHex: 0x555555)
+  @objc open var inputTextViewFont: UIFont = UIFont.systemFont(ofSize: 18)
   
   var inputViewStatus: IMUIInputStatus = .none
   @objc open weak var inputViewDelegate: IMUIInputViewDelegate? {
@@ -36,14 +41,18 @@ open class IMUIInputView: UIView {
   
   @IBOutlet weak var inputTextViewHeight: NSLayoutConstraint!
   
-  @IBOutlet weak var featureSelectorView: IMUIFeatureListView!
+  @IBOutlet open weak var featureSelectorView: IMUIFeatureListView!
   @IBOutlet open weak var featureView: IMUIFeatureView!
-  @IBOutlet weak var inputTextView: UITextView!
+  @IBOutlet open weak var inputTextView: UITextView!
   @IBOutlet weak var micBtn: UIButton!
   @IBOutlet weak var photoBtn: UIButton!
   @IBOutlet weak var cameraBtn: UIButton!
   @IBOutlet weak var sendBtn: UIButton!
-  @IBOutlet weak var sendNumberLabel: UILabel!
+  
+  @IBOutlet weak var paddingLeft: NSLayoutConstraint!
+  @IBOutlet weak var paddingRight: NSLayoutConstraint!
+  @IBOutlet weak var paddingTop: NSLayoutConstraint!
+  @IBOutlet weak var paddingBottom: NSLayoutConstraint!
   
   override public init(frame: CGRect) {
     super.init(frame: frame)
@@ -53,10 +62,12 @@ open class IMUIInputView: UIView {
     self.addSubview(view)
     view.frame = self.bounds
     
-    inputTextView.textContainer.lineBreakMode = .byWordWrapping
+    self.inputTextView.textContainer.lineBreakMode = .byWordWrapping
+    self.inputTextView.font = UIFont.systemFont(ofSize: 14)
+    self.inputTextView.textColor = inputTextViewTextColor
+    self.inputTextView.layoutManager.allowsNonContiguousLayout = false
     inputTextView.delegate = self
     self.featureView.delegate = self
-    print("fsad")
   }
   
   open override func awakeFromNib() {
@@ -65,12 +76,11 @@ open class IMUIInputView: UIView {
                                            selector: #selector(self.keyboardFrameChanged(_:)),
                                            name: NSNotification.Name.UIKeyboardWillChangeFrame,
                                            object: nil)
-    self.sendNumberLabel.isHidden = true
-    self.sendNumberLabel.layer.masksToBounds = true
-    self.sendNumberLabel.layer.cornerRadius = self.sendNumberLabel.imui_width/2
-    self.sendNumberLabel.layer.shadowOffset = CGSize(width: 2, height: 2)
-    self.sendNumberLabel.layer.shadowRadius = 5
-    self.sendNumberLabel.layer.shadowOpacity = 0.5
+    
+    self.paddingLeft.constant = self.inputTextViewPadding.left
+    self.paddingRight.constant = self.inputTextViewPadding.right
+    self.paddingTop.constant = self.inputTextViewPadding.top
+    self.paddingBottom.constant = self.inputTextViewPadding.bottom
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -80,6 +90,9 @@ open class IMUIInputView: UIView {
     
     self.addSubview(view)
     view.frame = self.bounds
+    
+    inputTextView.textContainer.lineFragmentPadding = 0
+    inputTextView.textContainerInset = .zero
     
     inputTextView.textContainer.lineBreakMode = .byWordWrapping
     inputTextView.delegate = self
@@ -104,14 +117,30 @@ open class IMUIInputView: UIView {
       self.inputViewDelegate?.keyBoardWillShow?(height: keyboardValue.cgRectValue.size.height, durationTime: duration)
       self.moreViewHeight.constant = IMUIFeatureViewHeight
     }
-      self.superview?.layoutIfNeeded()
     }
   }
   
   func fitTextViewSize(_ textView: UITextView) {
-      let textViewFitSize = textView.sizeThatFits(CGSize(width: self.view.imui_width, height: CGFloat(MAXFLOAT)))
-      self.inputTextViewHeight.constant = textViewFitSize.height
+      let textViewFitSize = textView.sizeThatFits(CGSize(width: textView.imui_width, height: CGFloat(MAXFLOAT)))
+      if textViewFitSize.height <= inputTextViewHeightRange.minimum {
+        self.inputTextViewHeight.constant = inputTextViewHeightRange.minimum
+        return
+      }
+
+      let newValue = textViewFitSize.height > inputTextViewHeightRange.maximum ? inputTextViewHeightRange.maximum : textViewFitSize.height
+      if newValue != self.inputTextViewHeight.constant {
+        self.inputTextViewHeight.constant = 120
+        DispatchQueue.main.async {
+          self.inputTextViewHeight.constant = newValue
+          textView.scrollRangeToVisible(NSRange(location: 0, length: 0))
+        }
+      }
     }
+
+  // 该接口提供给 React Native 用于处理 第三库（react-navigation 或 react-native-router-flux ）可能导致的布局问题。
+  @objc public func layoutInputView() {
+      self.fitTextViewSize(self.inputTextView)
+  }
   
   open func showFeatureView() {
     UIView.animate(withDuration: IMUIShowFeatureViewAnimationDuration) {
@@ -124,6 +153,8 @@ open class IMUIInputView: UIView {
     UIView.animate(withDuration: IMUIShowFeatureViewAnimationDuration) { 
       self.moreViewHeight.constant = 0
       self.inputTextView.resignFirstResponder()
+      self.featureView.currentType = .none
+      self.featureView.featureCollectionView.reloadData()
       self.superview?.layoutIfNeeded()
     }
   }
@@ -139,6 +170,7 @@ extension IMUIInputView: UITextViewDelegate {
   public func textViewDidChange(_ textView: UITextView) {
     self.fitTextViewSize(textView)
     self.updateSendBtnToPhotoSendStatus()
+    self.inputViewDelegate?.textDidChange?(text: textView.text)
   }
   
   public func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
@@ -170,10 +202,8 @@ extension IMUIInputView: IMUIFeatureListDelegate {
   }
   
   public func onClickSend(with cell: IMUIFeatureListIconCell) {
-//    print("onClickSend")
     self.clickSendBtn(cell: cell)
   }
-  
   
   func clickMicBtn(cell: IMUIFeatureListIconCell) {
     self.leaveGalleryMode()
@@ -241,6 +271,7 @@ extension IMUIInputView: IMUIFeatureListDelegate {
     if inputTextView.text != "" {
       inputViewDelegate?.sendTextMessage?(self.inputTextView.text)
       inputTextView.text = ""
+      self.inputViewDelegate?.textDidChange?(text: "")
       fitTextViewSize(inputTextView)
     }
     
@@ -249,6 +280,16 @@ extension IMUIInputView: IMUIFeatureListDelegate {
 }
 
 extension IMUIInputView: IMUIFeatureViewDelegate {
+  
+  public func cameraRecoverScreen() {
+    self.inputViewDelegate?.cameraRecoverScreen?()
+  }
+  
+  public func cameraFullScreen() {
+    self.inputViewDelegate?.cameraFullScreen?()
+  }
+  
+  
   public func didChangeSelectedGallery(with gallerys: [PHAsset]) {
       self.updateSendBtnToPhotoSendStatus()
   }
@@ -274,13 +315,14 @@ extension IMUIInputView: IMUIFeatureViewDelegate {
   public func didSeletedEmoji(with emoji: IMUIEmojiModel) {
     switch emoji.emojiType {
     case .emoji:
-      self.inputTextView.text.append(emoji.emoji!)
+      let inputStr = "\(self.inputTextView.text!)\(emoji.emoji!)"
+      self.inputTextView.text = inputStr
       self.fitTextViewSize(self.inputTextView)
       self.updateSendBtnToPhotoSendStatus()
+      self.inputViewDelegate?.textDidChange?(text: inputStr)
     default:
       return
     }
-    
   }
   
   public func didRecordVoice(with voicePath: String, durationTime: Double) {
@@ -294,4 +336,6 @@ extension IMUIInputView: IMUIFeatureViewDelegate {
   public func didRecordVideo(with videoPath: String, durationTime: Double) {
     self.inputViewDelegate?.finishRecordVideo?(videoPath: videoPath, durationTime: durationTime)
   }
+  
+
 }
