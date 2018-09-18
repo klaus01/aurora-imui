@@ -12,11 +12,11 @@ import UIKit
 @objc public protocol IMUIMessageStatusViewProtocol: NSObjectProtocol {
   // outGoing message
   func layoutFailedStatus()
-  func layoutSendingStatus()
+  func layoutSendingStatus(progress: Float)
   func layoutSuccessStatus()
   
   // inComming message
-  func layoutMediaDownloading()
+  func layoutMediaDownloading(progress: Float)
   func layoutMediaDownloadFail()
   
   var statusViewID: String { get }

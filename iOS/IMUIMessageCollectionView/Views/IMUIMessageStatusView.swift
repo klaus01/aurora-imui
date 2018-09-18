@@ -10,7 +10,7 @@ import UIKit
 
 public class IMUIMessageDefaultStatusView: UIButton, IMUIMessageStatusViewProtocol {
 
-  public func layoutMediaDownloading() {
+  public func layoutMediaDownloading(progress: Float) {
     
   }
   
@@ -51,7 +51,7 @@ public class IMUIMessageDefaultStatusView: UIButton, IMUIMessageStatusViewProtoc
     activityIndicator.stopAnimating()
   }
   
-  public func layoutSendingStatus() {
+  public func layoutSendingStatus(progress: Float) {
     self.isSelected = false
     activityIndicator.startAnimating()
   }

@@ -33,7 +33,7 @@ open class IMUIMessageCollectionView: UIView {
   var viewCache = IMUIReuseViewCache()
   
   var chatDataManager = IMUIChatDataManager()
-  @objc open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
+  open weak var delegate: IMUIMessageMessageCollectionViewDelegate?
   
   open override func awakeFromNib() {
     super.awakeFromNib()
@@ -91,29 +91,29 @@ open class IMUIMessageCollectionView: UIView {
     self.messageCollectionView.scrollToItem(at: endIndex, at: .bottom, animated: animated)
   }
   
-  @objc open func appendMessage(with message: IMUIMessageProtocol) {
+  open func appendMessage(with message: IMUIMessageProtocol) {
     self.chatDataManager.appendMessage(with: message)
     self.messageCollectionView.reloadData()
     self.scrollToBottom(with: true)
   }
 
-  @objc open func appendMessages(with messages: [IMUIMessageProtocol]) {
+  open func appendMessages(with messages: [IMUIMessageProtocol]) {
     self.chatDataManager.appendMessages(with: messages)
     self.messageCollectionView.reloadData()
     self.scrollToBottom(with: true)
   }
 
-  @objc open func insertMessage(with message: IMUIMessageProtocol) {
+  open func insertMessage(with message: IMUIMessageProtocol) {
     self.chatDataManager.insertMessage(with: message)
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  @objc open func insertMessages(with messages:[IMUIMessageProtocol]) {
+  open func insertMessages(with messages:[IMUIMessageProtocol]) {
     self.chatDataManager.insertMessages(with: messages)
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  @objc open func updateMessage(with message:IMUIMessageProtocol) {
+  open func updateMessage(with message:IMUIMessageProtocol) {
     self.chatDataManager.updateMessage(with: message)
     if let index = chatDataManager.index(of: message) {
       let indexPath = IndexPath(item: index, section: 0)
@@ -121,12 +121,12 @@ open class IMUIMessageCollectionView: UIView {
     }
   }
   
-  @objc open func removeMessage(with messageId: String) {
+  open func removeMessage(with messageId: String) {
     self.chatDataManager.removeMessage(with: messageId)
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  @objc open func removeAllMessages() {
+  open func removeAllMessages() {
     self.chatDataManager.removeAllMessages()
     self.messageCollectionView.reloadData()
   }
@@ -148,7 +148,7 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
   public func collectionView(_ collectionView: UICollectionView,
                              layout collectionViewLayout: UICollectionViewLayout,
                              sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let height = self.delegate?.messageCollectionView?(messageCollectionView: collectionView, heightForItemAtIndexPath: indexPath, messageModel: chatDataManager[indexPath.item])
+    let height = self.delegate?.messageCollectionView(messageCollectionView: collectionView, heightForItemAtIndexPath: indexPath, messageModel: chatDataManager[indexPath.item])
     if let _ = height {
       return CGSize(width: collectionView.superview!.imui_width, height: CGFloat(height!.floatValue))
     }
@@ -169,7 +169,7 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
     let messageModel = self.chatDataManager[indexPath.item]
     cellIdentify = IMUIBaseMessageCell.self.description()
 
-    let customCell = self.delegate?.messageCollectionView?(messageCollectionView: collectionView, forItemAt: indexPath, messageModel: messageModel)
+    let customCell = self.delegate?.messageCollectionView(messageCollectionView: collectionView, forItemAt: indexPath, messageModel: messageModel)
     if let _ = customCell {
       return customCell!
     }
@@ -182,14 +182,14 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
     
   public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
     let messageModel = self.chatDataManager[indexPath.item]
-    self.delegate?.messageCollectionView?(collectionView, willDisplayMessageCell: cell, forItemAt: indexPath, model: messageModel)
+    self.delegate?.messageCollectionView(collectionView, willDisplayMessageCell: cell, forItemAt: indexPath, model: messageModel)
   }
   
   public func collectionView(_ collectionView: UICollectionView,
                       didSelectItemAt indexPath: IndexPath) {
     let messageModel = self.chatDataManager[indexPath.item]
     
-    self.delegate?.messageCollectionView?(collectionView, forItemAt: indexPath, model: messageModel)
+    self.delegate?.messageCollectionView(collectionView, forItemAt: indexPath, model: messageModel)
   }
 
 
@@ -202,7 +202,7 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
     
     if messageModel is IMUIMessageModelProtocol {
       (didEndDisplaying as! IMUIMessageCellProtocol).didDisAppearCell()
-      self.delegate?.messageCollectionView?(collectionView, didEndDisplaying: didEndDisplaying, forItemAt: forItemAt, model: messageModel)
+      self.delegate?.messageCollectionView(collectionView, didEndDisplaying: didEndDisplaying, forItemAt: forItemAt, model: messageModel)
     }
     
   }
@@ -211,13 +211,13 @@ extension IMUIMessageCollectionView: UICollectionViewDelegate, UICollectionViewD
 
 extension IMUIMessageCollectionView: UIScrollViewDelegate {
   public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-    self.delegate?.messageCollectionView?(self.messageCollectionView)
+    self.delegate?.messageCollectionView(self.messageCollectionView)
   }
   public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    self.delegate?.messageCollectionViewDidEndDragging?(scrollView, willDecelerate: decelerate)
+    self.delegate?.messageCollectionViewDidEndDragging(scrollView, willDecelerate: decelerate)
   }
   public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    self.delegate?.messageCollectionViewDidEndDecelerating?(scrollView)
+    self.delegate?.messageCollectionViewDidEndDecelerating(scrollView)
   }
 }
 

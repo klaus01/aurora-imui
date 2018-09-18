@@ -13,7 +13,7 @@ import UIKit
  *  The `IMUIMessageModelProtocol` protocol defines the common interface with message model objects
  *  It declares the required and optional methods which model should implement it
  */
-@objc public protocol IMUIMessageModelProtocol: IMUIMessageProtocol {
+public protocol IMUIMessageModelProtocol: IMUIMessageProtocol {
   
   
   /**
@@ -65,7 +65,7 @@ import UIKit
    * If message type is voice or video, get duration through this method.
    * @return duration of audio or video
    */
-  @objc var duration: CGFloat { get }
+  var duration: CGFloat { get }
   
   /**
    *  @optional get function

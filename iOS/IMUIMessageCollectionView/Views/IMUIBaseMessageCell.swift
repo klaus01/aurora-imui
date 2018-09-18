@@ -144,18 +144,14 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
     
     let statusView = self.statusView as! IMUIMessageStatusViewProtocol
     switch message.messageStatus {
-      case .sending:
-        statusView.layoutSendingStatus()
-        break
+      case .sending(let progress):
+        statusView.layoutSendingStatus(progress: progress)
       case .failed:
         statusView.layoutFailedStatus()
-        break
       case .success:
         statusView.layoutSuccessStatus()
-        break
-      case .mediaDownloading:
-        statusView.layoutMediaDownloading()
-        break
+      case .mediaDownloading(let progress):
+        statusView.layoutMediaDownloading(progress: progress)
       case .mediaDownloadFail:
         statusView.layoutMediaDownloadFail()
     }
@@ -176,22 +172,22 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   }
   
   @objc func tapBubbleView() {
-    self.delegate?.messageCollectionView?(didTapMessageBubbleInCell: self, model: self.message!)
+    self.delegate?.messageCollectionView(didTapMessageBubbleInCell: self, model: self.message!)
   }
   
   @objc func longTapBubbleView(sender: UITapGestureRecognizer) {
     if (sender.state == .began) {
-        self.delegate?.messageCollectionView?(beganLongTapMessageBubbleInCell: self, model: self.message!)
+        self.delegate?.messageCollectionView(beganLongTapMessageBubbleInCell: self, model: self.message!)
     }
     
   }
   
   @objc func tapHeaderImage() {
-    self.delegate?.messageCollectionView?(didTapHeaderImageInCell: self, model: self.message!)
+    self.delegate?.messageCollectionView(didTapHeaderImageInCell: self, model: self.message!)
   }
   
   @objc func tapSatusView() {
-    self.delegate?.messageCollectionView?(didTapStatusViewInCell: self, model: self.message!)
+    self.delegate?.messageCollectionView(didTapStatusViewInCell: self, model: self.message!)
   }
   
   func didDisAppearCell() {

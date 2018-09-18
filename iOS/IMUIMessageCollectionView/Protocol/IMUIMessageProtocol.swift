@@ -8,7 +8,7 @@
 
 import Foundation
 
-@objc public protocol IMUIMessageProtocol: NSObjectProtocol {
+public protocol IMUIMessageProtocol {
   /**
    *  @required function
    *

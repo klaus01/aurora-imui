@@ -9,14 +9,14 @@
 import UIKit
 
 
-@objc public enum IMUIMessageStatus: UInt {
+public enum IMUIMessageStatus {
   // Sending message status
   case failed
-  case sending
+  case sending(Float)
   case success
   
   // received message status
-  case mediaDownloading
+  case mediaDownloading(Float)
   case mediaDownloadFail
 }
 
