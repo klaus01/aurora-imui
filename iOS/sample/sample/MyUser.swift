@@ -23,7 +23,7 @@ class MyUser: NSObject, IMUIUserProtocol {
     return ""
   }
   
-  func Avatar() -> UIImage {
+  func Avatar() -> UIImage? {
     return UIImage(named: "defoult_header")!
   }
   

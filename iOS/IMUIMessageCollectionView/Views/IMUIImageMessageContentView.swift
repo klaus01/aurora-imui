@@ -28,12 +28,12 @@ public class IMUIImageMessageContentView: UIView, IMUIMessageContentViewProtocol
     
     imageView.frame = CGRect(origin: CGPoint.zero, size: message.layout.bubbleContentSize)
     imageView.image = UIImage(contentsOfFile: message.mediaFilePath())
-    if imageView.image == nil && (message.webImageUrl?() == nil || message.webImageUrl?() == "") {
+    if imageView.image == nil && message.webImageUrl() == "" {
       self.imageView.image = UIImage.imuiImage(with: "image-broken")
     }
     
     task?.suspend()
-    self.urlString = message.webImageUrl?() ?? ""
+    self.urlString = message.webImageUrl()
     task = IMUIWebImageTaskManager.shared.downloadImage(self.urlString!) { (data, precent, urlString, error) in
       if (error != nil) {
         return

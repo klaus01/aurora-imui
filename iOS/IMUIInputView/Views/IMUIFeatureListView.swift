@@ -71,7 +71,7 @@ open class IMUIFeatureListView: UIView {
     super.init(coder: aDecoder)
     
     let bundle = Bundle.imuiBundle()
-    view = bundle.loadNibNamed("IMUIFeatureListView", owner: self, options: nil)?.first as! UIView
+    view = (bundle.loadNibNamed("IMUIFeatureListView", owner: self, options: nil)?.first! as! UIView)
     
     self.addSubview(view)
     view.frame = self.bounds

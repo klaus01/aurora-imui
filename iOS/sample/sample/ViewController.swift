@@ -164,7 +164,7 @@ extension ViewController: IMUIMessageMessageCollectionViewDelegate {
 // custom view
   func messageCollectionView(messageCollectionView: UICollectionView, forItemAt: IndexPath, messageModel: IMUIMessageProtocol) -> UICollectionViewCell? {
     if messageModel is MessageEventModel {
-      var cellIdentify = MessageEventCollectionViewCell.self.description()
+      let cellIdentify = MessageEventCollectionViewCell.self.description()
       let cell = messageCollectionView.dequeueReusableCell(withReuseIdentifier: cellIdentify, for: forItemAt) as! MessageEventCollectionViewCell
       let message = messageModel as! MessageEventModel
       cell.presentCell(eventText: message.eventText)

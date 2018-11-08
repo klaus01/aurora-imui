@@ -296,7 +296,7 @@ class IMUIRecordVoiceCell: UICollectionViewCell, IMUIFeatureCellProtocol {
     
     dateFormatter.dateFormat = "yyyy-MM-dd-hh-mm-ss"
     recorderPath?.append("\(dateFormatter.string(from: now))-\(UUID().uuidString)-MySound.m4a")
-    print("\(recorderPath)")
+    print("\(recorderPath ?? "")")
     return recorderPath!
   }
   

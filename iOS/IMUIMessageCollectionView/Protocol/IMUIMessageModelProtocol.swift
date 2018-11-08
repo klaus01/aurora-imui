@@ -66,7 +66,7 @@ public protocol IMUIMessageModelProtocol: IMUIMessageProtocol {
    * get web image from url through this method
    * @return image url
    */
-  @objc optional func webImageUrl() -> String
+  func webImageUrl() -> String
   
   /**
    * If message type is voice or video, get duration through this method.

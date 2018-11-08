@@ -73,7 +73,7 @@ open class IMUICustomInputView: UIView {
   override public init(frame: CGRect) {
     super.init(frame: frame)
     let bundle = Bundle.imuiInputViewBundle()
-    view = bundle.loadNibNamed("IMUICustomInputView", owner: self, options: nil)?.first as! UIView
+    view = (bundle.loadNibNamed("IMUICustomInputView", owner: self, options: nil)?.first! as! UIView)
     
     self.addSubview(view)
     view.frame = self.bounds
@@ -101,7 +101,7 @@ open class IMUICustomInputView: UIView {
   required public init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
     let bundle = Bundle.imuiInputViewBundle()
-    view = bundle.loadNibNamed("IMUICustomInputView", owner: self, options: nil)?.first as! UIView
+    view = (bundle.loadNibNamed("IMUICustomInputView", owner: self, options: nil)?.first! as! UIView)
     
     self.addSubview(view)
     view.frame = self.bounds
@@ -171,7 +171,7 @@ open class IMUICustomInputView: UIView {
     let dic = NSDictionary(dictionary: (notification as NSNotification).userInfo!)
     let keyboardValue = dic.object(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue
     let bottomDistance = UIScreen.main.bounds.size.height - keyboardValue.cgRectValue.origin.y
-    let duration = Double(dic.object(forKey: UIResponder.keyboardAnimationDurationUserInfoKey) as! NSNumber)
+    let duration = (dic.object(forKey: UIResponder.keyboardAnimationDurationUserInfoKey) as! NSNumber).doubleValue
     
     UIView.animate(withDuration: duration) {
       if bottomDistance > 10.0 {

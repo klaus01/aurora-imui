@@ -54,7 +54,7 @@ open class IMUIFeatureView: UIView {
     super.init(coder: aDecoder)
     
     let bundle = Bundle.imuiInputViewBundle()
-    view = bundle.loadNibNamed("IMUIFeatureView", owner: self, options: nil)?.first as! UIView
+    view = (bundle.loadNibNamed("IMUIFeatureView", owner: self, options: nil)?.first! as! UIView)
     
     self.addSubview(view)
     view.frame = self.bounds
@@ -145,12 +145,12 @@ open class IMUIFeatureView: UIView {
 extension IMUIFeatureView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return 1
-    switch currentType {
-    case .none:
-      return 0
-    default:
-      return 1
-    }
+//    switch currentType {
+//    case .none:
+//      return 0
+//    default:
+//      return 1
+//    }
   }
   
   public func numberOfSections(in collectionView: UICollectionView) -> Int {
