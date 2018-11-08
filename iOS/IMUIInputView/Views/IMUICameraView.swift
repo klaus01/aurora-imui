@@ -27,7 +27,9 @@ class IMUICameraView: UIView {
   public typealias PathCallback = (String, Double) -> ()
   public typealias DataCallback = (Data) -> ()
   public typealias ButtonOnClickCallback = (UIButton) -> ()
+  public typealias EventCallback = () -> ()
   
+  public var startRecordVideoCallback: EventCallback?
   public var recordVideoCallback: PathCallback?
   public var shootPictureCallback: DataCallback?
   public var onClickFullSizeCallback: ButtonOnClickCallback?
@@ -301,7 +303,7 @@ class IMUICameraView: UIView {
       for device in AVCaptureDevice.devices() {
         if (device as AnyObject).hasMediaType( AVMediaType.video ) {
           if (device as AnyObject).position == cameraDevicePosition {
-            defaultVideoDevice = device as? AVCaptureDevice
+            defaultVideoDevice = device
             currentCameraDeviceType = cameraDevicePosition
           }
         }
@@ -460,6 +462,7 @@ class IMUICameraView: UIView {
       session.sessionPreset = AVCaptureSession.Preset.cif352x288
       session.commitConfiguration()
       self.inConfiging = false
+      self.startRecordVideoCallback?()
       videoFileOutput?.startRecording(to: URL(fileURLWithPath: outputPath), recordingDelegate: self)
     } else {
       videoFileOutput?.stopRecording()
@@ -577,7 +580,21 @@ class IMUICameraView: UIView {
         }
       )
       
-      self.inProgressPhotoCaptureDelegates[photoCaptureDelegate.requestedPhotoSettings.uniqueID] = photoCaptureDelegate
+  self.inProgressPhotoCaptureDelegates[photoCaptureDelegate.requestedPhotoSettings.uniqueID] = photoCaptureDelegate
+
+      switch self.currentCameraDeviceType {
+      case .front:
+        
+        break
+      case .back:
+        break
+      default:
+        break
+      }
+      if #available(iOS 10.0, *) {
+          photoSettings.flashMode = .off
+      }
+
       self.photoOutput?.capturePhoto(with: photoSettings, delegate: photoCaptureDelegate)
     }
   }
@@ -587,8 +604,8 @@ class IMUICameraView: UIView {
     stillImageOutput.outputSettings = [AVVideoCodecKey: AVVideoCodecJPEG]
     
     var videoConnection: AVCaptureConnection? = nil
-    for connection in stillImageOutput.connections as! [AVCaptureConnection] {
-      for port in connection.inputPorts as! [AVCaptureInput.Port]{
+    for connection in stillImageOutput.connections {
+      for port in connection.inputPorts {
         if port.mediaType == AVMediaType.video {
           videoConnection = connection
           break
@@ -604,7 +621,7 @@ class IMUICameraView: UIView {
       if imageSampleBuffer == nil {
         return
       }
-      let exifAttachments = CMGetAttachment(imageSampleBuffer!, kCGImagePropertyExifDictionary, nil)
+      let exifAttachments = CMGetAttachment(imageSampleBuffer!, key: kCGImagePropertyExifDictionary, attachmentModeOut: nil)
       
       if (exifAttachments != nil) {
         print("exifAttachments exit")
@@ -615,8 +632,6 @@ class IMUICameraView: UIView {
       let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageSampleBuffer!)
 
       self.shootPictureCallback?(imageData!)
-      let image = UIImage(data: imageData!)
-      
     }
   }
   
@@ -627,7 +642,7 @@ class IMUICameraView: UIView {
     dateFormatter.dateFormat = "yy-MMMM-dd"
     recorderPath = NSTemporaryDirectory()
     dateFormatter.dateFormat = "yyyy-MM-dd-hh-mm-ss"
-    recorderPath?.append("\(dateFormatter.string(from: now))-video.mp4")
+    recorderPath?.append("\(dateFormatter.string(from: now))-\(UUID().uuidString)-video.mp4")
     return recorderPath!
   }
 }

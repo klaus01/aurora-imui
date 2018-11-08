@@ -19,7 +19,7 @@ const AuroraIMUIController = IMUI.AuroraIMUIController; // the IMUI controller, 
 <ChatInput />
 ```
 详情可以参考 iOS Android 示例
-> [Example 用法](./../sample/app/app.js)
+> [Example 用法](../sample/App.js)
 
 
 
@@ -30,6 +30,7 @@ const AuroraIMUIController = IMUI.AuroraIMUIController; // the IMUI controller, 
   - [stopPlayVoice](#stopplayvoice)
   - [removeMessage](#removeMessage)
   - [removeAllMessage](#removeAllMessage)
+  - [hidenFeatureView](#hidenfeatureview)
   - [Event](#auroraimuicontrollerevent)
     - [MessageListDidLoadListener](#messagelistdidloadlistener)
 
@@ -76,8 +77,10 @@ const AuroraIMUIController = IMUI.AuroraIMUIController; // the IMUI controller, 
     - [isAllowPullToRefresh](#isallowpulltorefresh)
 - [ChatInput](#chatinput)
   - [Props customizable style]()
-    - [chatInputBackgroupColor](#chatInputbackgroupcolor)
-    - [showSelectAlbumBtn](#showSelectAlbumBtn)
+    - [customLayoutItems](#customlayoutitemsios-only)
+    - [chatInputBackgroundColor](#chatInputBackgroundColor)
+    - [showSelectAlbumBtn](#showselectalbumbtnandroid-only)
+    - [showRecordVideoBtn](#showRecordVideoBtnandroid-only)   
     - [inputPadding](#inputPadding)
     - [inputTextColor](#inputTextColor)
     - [inputTextSize](#inputTextSize)
@@ -98,6 +101,8 @@ const AuroraIMUIController = IMUI.AuroraIMUIController; // the IMUI controller, 
     - [onSwitchToEmojiMode](#onswitchtoemojimode)
     - [onTouchEditText](#ontouchedittext)
     - [onSizeChange](#onsizechange)
+    - [onFullScreen](#onfullscreen)
+    - [onRecoverScreen](#onrecoverscreen)
     - [onClickSelectAlbum](#onClickSelectAlbum)
 
 
@@ -159,7 +164,7 @@ AuroraIMUIController.updateMessage(message);
 
 参数：[{[message](./Models_zh.md#message)}]
 
-插入顺序会根据传入的消息数组顺序来排序。
+将消息列表插入到聊天列表顶部。**被插入的消息列表必须按照时间顺序排序。**
 
 example:
 
@@ -223,6 +228,14 @@ example:
 ```js
 AuroraIMUIController.removeAllMessage()
 ```
+#### hidenFeatureView
+
+隐藏 inputView 的展开视图。
+
+```
+AuroraIMUIController.hidenFeatureView()
+```
+
 #### stopPlayVoice
 
 停止正在播放的音频，这里会停止所有的声音，包括 ChatInput 和 MessageList 正在播放的声音。
@@ -560,18 +573,41 @@ Example: `messageTextLineHeight={5}`
 ### Props customizable style
 
 ------
+#### customLayoutItems
 
-#### chatInputBackgroupColor
+**PropTypes.string:** 
+
+自定义 ChatInput 组件和布局。
+
+Eample: 
+
+```
+// 可以在 ChatInput 的 left/right/bottom 放置各功能 item，(不可以重复)
+customLayoutItems={{
+            left: ['voice'],
+            right: ['send'],
+            bottom: ['gallery','emoji','camera']
+		}} 
+		
+
+// 如果 left/right/bottom 没有提供则不会显示，直接隐藏。
+customLayoutItems={{
+            left: ['voice'],
+            right: ['send']
+		}} 
+```
+
+#### chatInputBackgroundColor
 
 **PropTypes.string:**
 
 设置输入组件背景颜色。
 
-Example:  ```chatInputBackgroupColor="#000000"```
+Example:  ```chatInputBackgroundColor="#000000"```
 
 ------
 
-#### showSelectAlbumBtn
+#### showSelectAlbumBtn(Android Only)
 **PropTypes.bool:**
 
 设置选择相册按钮的可见性。
@@ -580,6 +616,14 @@ Example: ```showSelectAlbumBtn={true}```
 
 ------
 
+#### showRecordVideoBtn(Android Only)
+**PropTypes.bool:**
+
+设置视频录制按钮的可见性。
+
+Example: ```showRecordVideoBtn={true}```
+
+------
 ### inputPadding
 
 **PropTypes.object:** {left: number, top: number, right: number, bottom: number}
@@ -660,7 +704,7 @@ Example: `inputTextLineHeight={2}`
 
 **PropTypes.function:**``` (result) => {}```
 
- 完成录制视频触发，result 参数为 ```{mediaPath: string, durationTime: number}```。
+ 完成录制视频触发，result 参数为 ```{mediaPath: string, duration: number}```。
 
 ***
 
@@ -732,13 +776,29 @@ Example: `inputTextLineHeight={2}`
 
 **PropTypes.function:** `({width: number, height: number}) => {}`
 
-输入组件尺寸变更时触发。
+输入组件尺寸变更时触发 (建议使用这个方法来处理 inputView 的尺寸变化)。
+
+***
+
+#### onFullScreen
+
+**PropTypes.function:** `() => {}`
+
+当摄像机全屏的时候触发这个回调（例如：可以在摄像机全屏的时候隐藏系统状态栏）。
+
+***
+
+#### onRecoverScreen
+
+**PropTypes.function:** `() => {}`
+
+摄像机取消全屏的时候触发这个回调
 
 ***
 
 #### onClickSelectAlbum
 
-**PropTypes.function:** `() => {}`
+**PropTypes.function:** `() => {}` (Android only)
 
 点击选择相册按钮触发(选择相册按钮默认是可见的，可以通过 [showSelectAlbumBtn](#showSelectAlbumBtn) 改变 )
 

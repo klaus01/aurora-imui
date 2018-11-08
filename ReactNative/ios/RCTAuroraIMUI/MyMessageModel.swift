@@ -32,6 +32,7 @@ open class RCTMessageModel: IMUIMessageModel {
   static let kMsgKeyText = "text"
   static let kMsgKeyisOutgoing = "isOutgoing"
   static let kMsgKeyMediaFilePath = "mediaPath"
+  static let kMsgKeyImageUrl = "imageUrl"
   static let kMsgKeyDuration = "duration"
   static let kMsgKeyContentSize = "contentSize"
   static let kMsgKeyContent = "content"
@@ -47,21 +48,26 @@ open class RCTMessageModel: IMUIMessageModel {
   open var myTextMessage: String = ""
   
   var mediaPath: String = ""
+  var imageUrl: String = ""
   var extras: NSDictionary?
   
   override open func mediaFilePath() -> String {
     return mediaPath
   }
 
-  @objc static open var outgoingBubbleImage: UIImage = {
+  override open func webImageUrl() -> String {
+    return imageUrl
+  }
+  
+  @objc static public var outgoingBubbleImage: UIImage = {
     var bubbleImg = UIImage.imuiImage(with: "outGoing_bubble")
-    bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsetsMake(24, 10, 9, 15), resizingMode: .tile)
+    bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsets(top: 24, left: 10, bottom: 9, right: 15), resizingMode: .tile)
     return bubbleImg!
   }()
   
-  @objc static open var incommingBubbleImage: UIImage = {
+  @objc static public var incommingBubbleImage: UIImage = {
     var bubbleImg = UIImage.imuiImage(with: "inComing_bubble")
-    bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsetsMake(24, 15, 9, 10), resizingMode: .tile)
+    bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsets(top: 24, left: 15, bottom: 9, right: 10), resizingMode: .tile)
     return bubbleImg!
   }()
   
@@ -73,11 +79,12 @@ open class RCTMessageModel: IMUIMessageModel {
     }
   }
   
-  @objc public init(msgId: String, messageStatus: IMUIMessageStatus, fromUser: RCTUser, isOutGoing: Bool, time: String, type: String, text: String, mediaPath: String, layout: IMUIMessageCellLayoutProtocol, duration: CGFloat, extras: NSDictionary?) {
+  @objc public init(msgId: String, messageStatus: IMUIMessageStatus, fromUser: RCTUser, isOutGoing: Bool, time: String, type: String, text: String, mediaPath: String, imageUrl: String, layout: IMUIMessageCellLayoutProtocol, duration: CGFloat, extras: NSDictionary?) {
     
     self.myTextMessage = text
     self.mediaPath = mediaPath
     self.extras = extras
+    self.imageUrl = imageUrl
     super.init(msgId: msgId, messageStatus: messageStatus, fromUser: fromUser, isOutGoing: isOutGoing, time: time, type: type, cellLayout: layout, duration: duration)
   }
   
@@ -109,8 +116,13 @@ open class RCTMessageModel: IMUIMessageModel {
     }
     
     var mediaPath = messageDic.object(forKey: RCTMessageModel.kMsgKeyMediaFilePath) as? String
+    var imgUrl = ""
     if let _ = mediaPath {
-      
+      if FileManager.default.fileExists(atPath: mediaPath!) {
+      } else {
+        imgUrl = mediaPath!
+        mediaPath = ""
+      }
     } else {
       mediaPath = ""
     }
@@ -145,6 +157,8 @@ open class RCTMessageModel: IMUIMessageModel {
         var imgSize = CGSize(width: 120, height: 160)
         if let img = UIImage(contentsOfFile: mediaPath!) {
           imgSize = RCTMessageModel.converImageSize(with: CGSize(width: img.size.width, height: img.size.height))
+        } else {
+          imgSize = CGSize(width: 120, height: 160)
         }
         
         messageLayout = MyMessageCellLayout(isOutGoingMessage: isOutgoing ?? true,
@@ -220,7 +234,7 @@ open class RCTMessageModel: IMUIMessageModel {
       
     }
     
-    self.init(msgId: msgId, messageStatus: msgStatus, fromUser: user, isOutGoing: isOutgoing ?? true, time: timeString!, type: msgType!, text: text!, mediaPath: mediaPath!, layout:  messageLayout!,duration: durationTime, extras: extras)
+    self.init(msgId: msgId, messageStatus: msgStatus, fromUser: user, isOutGoing: isOutgoing ?? true, time: timeString!, type: msgType!, text: text!, mediaPath: mediaPath!,imageUrl: imgUrl, layout:  messageLayout!,duration: durationTime, extras: extras)
 
   }
   
@@ -271,7 +285,13 @@ open class RCTMessageModel: IMUIMessageModel {
         break
       case "image":
         messageDic.setValue(RCTMessageModel.kMsgTypeImage, forKey: RCTMessageModel.kMsgKeyMsgType)
-        messageDic.setValue(self.mediaPath, forKey: RCTMessageModel.kMsgKeyMediaFilePath)
+        
+        if (self.mediaPath == "") {
+          messageDic.setValue(self.imageUrl, forKey: RCTMessageModel.kMsgKeyMediaFilePath)
+        } else {
+          messageDic.setValue(self.mediaPath, forKey: RCTMessageModel.kMsgKeyMediaFilePath)
+        }
+        
         break
       case "voice":
         messageDic.setValue(RCTMessageModel.kMsgTypeVoice, forKey: RCTMessageModel.kMsgKeyMsgType)
@@ -323,7 +343,12 @@ open class RCTMessageModel: IMUIMessageModel {
       userDic.setValue(self.fromUser.userId(), forKey: "userId")
       userDic.setValue(self.fromUser.displayName(), forKey: "diaplayName")
       let user = self.fromUser as! RCTUser
-      userDic.setValue(user.rAvatarFilePath, forKey: "avatarPath")
+      
+      if (user.rAvatarFilePath == "") {
+        userDic.setValue(user.rAvatarUrl, forKey: "avatarPath")
+      } else {
+        userDic.setValue(user.rAvatarFilePath, forKey: "avatarPath")
+      }
       
       messageDic.setValue(userDic, forKey: "fromUser")
       messageDic.setValue(self.msgId, forKey: "msgId")

@@ -43,8 +43,6 @@ public class IMUIVideoMessageContentView: UIView, IMUIMessageContentViewProtocol
                                  y: durationY,
                                  width: 30,
                                  height: 24)
-    
-    
   }
   
 
@@ -64,7 +62,7 @@ public class IMUIVideoMessageContentView: UIView, IMUIMessageContentViewProtocol
       do {
         let imgGenerator = AVAssetImageGenerator(asset: asset)
         imgGenerator.appliesPreferredTrackTransform = true
-        let cgImage = try imgGenerator.copyCGImage(at: CMTimeMake(0, 1), actualTime: nil)
+        let cgImage = try imgGenerator.copyCGImage(at: CMTimeMake(value: 0, timescale: 1), actualTime: nil)
         DispatchQueue.main.async {
           self.videoView.image = UIImage(cgImage: cgImage)
         }

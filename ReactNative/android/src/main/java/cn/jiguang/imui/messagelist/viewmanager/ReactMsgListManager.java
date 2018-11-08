@@ -359,7 +359,7 @@ public class ReactMsgListManager extends ViewGroupManager<PullToRefreshLayout> i
             case RCT_INSERT_MESSAGES_ACTION:
                 messages = event.getMessages();
                 Log.d("RCTMessageListManager", "Add send message to top");
-                mAdapter.addToEnd(Arrays.asList(messages));
+                mAdapter.addToEndChronologically(Arrays.asList(messages));
                 break;
             case RCT_REMOVE_MESSAGE_ACTION:
                 String msgId = event.getMsgId();
@@ -379,7 +379,7 @@ public class ReactMsgListManager extends ViewGroupManager<PullToRefreshLayout> i
     @ReactProp(name = "isAllowPullToRefresh")
     public void setAllowPullToRefresh(PullToRefreshLayout root, boolean isAllowPullToRefresh) {
         Log.i(REACT_MESSAGE_LIST, "Set isAllowPullToRefresh: " + isAllowPullToRefresh);
-        root.setKeepHeaderWhenRefresh(isAllowPullToRefresh);
+        root.setPullToRefresh(isAllowPullToRefresh);
     }
 
     @ReactProp(name = "sendBubble")
@@ -533,10 +533,9 @@ public class ReactMsgListManager extends ViewGroupManager<PullToRefreshLayout> i
         mMessageList.setDisplayNamePadding(dip2px(left), dip2px(top), dip2px(right), dip2px(bottom));
     }
 
-    @ReactProp(name = "isAllowPullToRefresh")
-    public void isAllowPullToRefresh(PullToRefreshLayout root, boolean flag) {
-        mMessageList.forbidScrollToRefresh(!flag);
-        root.setEnabledNextPtrAtOnce(false);
+    @ReactProp(name = "displayNameEmsNumber")
+    public void setdisplayNameEmsNumber(PullToRefreshLayout root, int number) {
+        mMessageList.setDisplayNameEmsNumber(number);
     }
 
     @ReactProp(name = "eventTextColor")

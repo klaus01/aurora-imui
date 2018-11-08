@@ -157,6 +157,7 @@ public class CameraNew implements CameraSupport {
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
     private static SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
     private CameraCharacteristics mCameraCharacteristic;
+    private static boolean mIsTakingPicture = false;
     /**
      * An {@link ImageReader} that handles still image capture.
      */
@@ -215,6 +216,7 @@ public class CameraNew implements CameraSupport {
                     if (afState == null) {
                         captureStillPicture();
                     } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
+                            CaptureResult.CONTROL_AF_STATE_PASSIVE_FOCUSED == afState ||
                             CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
                         // CONTROL_AE_STATE can be null on some devices
                         Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
@@ -225,7 +227,7 @@ public class CameraNew implements CameraSupport {
                         } else {
                             runPrecaptureSequence();
                         }
-                    // 前置摄像头并且不支持自动对焦
+                        // 前置摄像头并且不支持自动对焦
                     } else if (!mIsFacingBack && afState == CaptureResult.CONTROL_AF_STATE_INACTIVE) {
                         mState = STATE_PICTURE_TAKEN;
                         captureStillPicture();
@@ -352,6 +354,8 @@ public class CameraNew implements CameraSupport {
         }
     };
 
+    private Surface mSurface;
+
     /**
      * Creates a new {@link CameraCaptureSession} for camera preview.
      */
@@ -364,14 +368,17 @@ public class CameraNew implements CameraSupport {
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
 
             // This is the output Surface we need to start preview.
-            Surface surface = new Surface(texture);
+            if(mSurface != null){
+                mSurface.release();
+            }
+            mSurface = new Surface(texture);
 
             // We set up a CaptureRequest.Builder with the output Surface.
             mPreviewRequestBuilder
                     = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            mPreviewRequestBuilder.addTarget(surface);
+            mPreviewRequestBuilder.addTarget(mSurface);
             // Here, we create a CameraCaptureSession for camera preview.
-            mCamera.createCaptureSession(Arrays.asList(surface, mImageReader.getSurface()),
+            mCamera.createCaptureSession(Arrays.asList(mSurface, mImageReader.getSurface()),
                     new CameraCaptureSession.StateCallback() {
 
                         @Override
@@ -513,6 +520,10 @@ public class CameraNew implements CameraSupport {
                 mImageReader.close();
                 mImageReader = null;
             }
+            if(mSurface != null){
+                mSurface.release();
+                mSurface = null ;
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
@@ -525,6 +536,10 @@ public class CameraNew implements CameraSupport {
     private void setUpCameraOutputs(int width, int height) {
         try {
             Activity activity = (Activity) mContext;
+            final String[] ids = mManager.getCameraIdList();
+            if (ids.length == 0) { // No camera
+                throw new RuntimeException("No camera available.");
+            }
             mCameraCharacteristic = mManager.getCameraCharacteristics(mCameraId);
             StreamConfigurationMap map = mCameraCharacteristic.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
@@ -648,6 +663,11 @@ public class CameraNew implements CameraSupport {
 
     @Override
     public void takePicture() {
+        if(mIsTakingPicture){
+            Log.i(TAG,"Is taking picture now,please wait.");
+            return;
+        }
+        mIsTakingPicture = true;
         lockFocus();
     }
 
@@ -707,8 +727,8 @@ public class CameraNew implements CameraSupport {
             setAutoFlash(captureBuilder);
 
             // Orientation
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION,
-                    mCameraCharacteristic.get(CameraCharacteristics.SENSOR_ORIENTATION));
+//            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION,
+//                    mCameraCharacteristic.get(CameraCharacteristics.SENSOR_ORIENTATION));
 
             CameraCaptureSession.CaptureCallback CaptureCallback
                     = new CameraCaptureSession.CaptureCallback() {
@@ -768,7 +788,7 @@ public class CameraNew implements CameraSupport {
         /**
          * The file we save the image into.
          */
-        private File mPhoto;
+        private File mPhoto, mLastPhoto;
 
         public ImageSaver(Image image) {
             mImage = image;
@@ -785,19 +805,30 @@ public class CameraNew implements CameraSupport {
                         new SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.getDefault()).format(new Date())
                                 + ".jpg");
                 output = new FileOutputStream(mPhoto);
+
+                // 前置摄像头水平翻转照片
+                Matrix matrix = new Matrix();
+                Bitmap rotateBmp;
+                Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                int w = bmp.getWidth();
+                int h = bmp.getHeight();
                 if (!mIsFacingBack) {
-                    Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    int w = bmp.getWidth();
-                    int h = bmp.getHeight();
-                    Matrix matrix = new Matrix();
-                    matrix.preScale(1, -1);
-                    Bitmap convertBmp = Bitmap.createBitmap(bmp, 0, 0, w, h, matrix, true);
-                    convertBmp.compress(Bitmap.CompressFormat.JPEG, 100, output);
+                    matrix.postScale(-1, 1);
+                    matrix.postRotate(90);
+                    rotateBmp = Bitmap.createBitmap(bmp, 0, 0, w, h, matrix, true);
                 } else {
-                    output.write(bytes);
+                    matrix.postRotate(90);
+                    rotateBmp = Bitmap.createBitmap(bmp, 0, 0, w, h, matrix, true);
                 }
+                rotateBmp.compress(Bitmap.CompressFormat.JPEG, 100, output);
+
                 if (mOnCameraCallbackListener != null) {
+                    if(mLastPhoto != null && mLastPhoto.getAbsolutePath().equals(mPhoto.getAbsolutePath())) // Forbid repeat
+                        return;
+                    Log.i(TAG,"Saved capture into "+ mPhoto.getAbsolutePath());
                     mOnCameraCallbackListener.onTakePictureCompleted(mPhoto.getAbsolutePath());
+                    mLastPhoto = mPhoto;
+                    mIsTakingPicture = false;
                 }
                 if (mCameraEventListener != null) {
                     mCameraEventListener.onFinishTakePicture();

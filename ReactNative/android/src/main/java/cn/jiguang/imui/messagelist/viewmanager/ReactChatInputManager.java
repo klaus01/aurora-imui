@@ -56,6 +56,7 @@ import cn.jiguang.imui.chatinput.listener.CameraControllerListener;
 import cn.jiguang.imui.chatinput.listener.OnCameraCallbackListener;
 import cn.jiguang.imui.chatinput.listener.OnMenuClickListener;
 import cn.jiguang.imui.chatinput.listener.RecordVoiceListener;
+import cn.jiguang.imui.chatinput.menu.Menu;
 import cn.jiguang.imui.chatinput.model.FileItem;
 import cn.jiguang.imui.chatinput.model.VideoItem;
 import cn.jiguang.imui.messagelist.AuroraIMUIModule;
@@ -64,7 +65,6 @@ import cn.jiguang.imui.messagelist.event.GetTextEvent;
 import cn.jiguang.imui.messagelist.event.OnTouchMsgListEvent;
 import cn.jiguang.imui.messagelist.event.ScrollEvent;
 import cn.jiguang.imui.messagelist.event.StopPlayVoiceEvent;
-import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -117,6 +117,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
     private int mSoftKeyboardHeight;
     private double mLineExpend = 0;
     private int mScreenWidth;
+    private String mLastPhotoPath = "";
     /**
      * Initial soft input height, set this value via {@link #setMenuContainerHeight}
      */
@@ -264,7 +265,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                     mChatInput.requestLayout();
                 } else {
                     mShowMenu = true;
-                    mChatInput.setPendingShowMenu(true);
+//                    mChatInput.setPendingShowMenu(true);
                     EmoticonsKeyboardUtils.closeSoftKeyboard(editText);
                     sendSizeChangedEvent(calculateMenuHeight());
                     new Handler().postDelayed(new Runnable() {
@@ -307,7 +308,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                 } else {
                     mChatInput.getSelectPhotoView().updateData();
                     mShowMenu = true;
-                    mChatInput.setPendingShowMenu(true);
+//                    mChatInput.setPendingShowMenu(true);
                     EmoticonsKeyboardUtils.closeSoftKeyboard(editText);
                     sendSizeChangedEvent(calculateMenuHeight());
                     new Handler().postDelayed(new Runnable() {
@@ -335,6 +336,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                     EasyPermissions.requestPermissions(activity,
                             activity.getResources().getString(R.string.rationale_camera),
                             RC_CAMERA, perms);
+                    return false;
                 }
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(mChatInput.getId(),
                         SWITCH_TO_CAMERA_EVENT, null);
@@ -350,7 +352,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                     mChatInput.requestLayout();
                 } else {
                     mShowMenu = true;
-                    mChatInput.setPendingShowMenu(true);
+//                    mChatInput.setPendingShowMenu(true);
                     mChatInput.initCamera();
                     EmoticonsKeyboardUtils.closeSoftKeyboard(editText);
                     new Handler().postDelayed(new Runnable() {
@@ -382,7 +384,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                     mChatInput.requestLayout();
                 } else {
                     mShowMenu = true;
-                    mChatInput.setPendingShowMenu(true);
+//                    mChatInput.setPendingShowMenu(true);
                     EmoticonsKeyboardUtils.closeSoftKeyboard(editText);
                     sendSizeChangedEvent(calculateMenuHeight());
                     new Handler().postDelayed(new Runnable() {
@@ -402,15 +404,23 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
         mChatInput.setOnCameraCallbackListener(new OnCameraCallbackListener() {
             @Override
             public void onTakePictureCompleted(String photoPath) {
-                if (mChatInput.isFullScreen()) {
-                    mContext.runOnUiQueueThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mChatInput.dismissCameraLayout();
-                            mChatInput.dismissMenuLayout();
-                        }
-                    });
+
+                if (mLastPhotoPath.equals(photoPath)) {
+                    return;
                 }
+                mLastPhotoPath = photoPath;
+
+
+                mContext.runOnUiQueueThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mChatInput.isFullScreen()) {
+
+                            mChatInput.dismissCameraLayout();
+                        }
+                        mChatInput.dismissMenuLayout();
+                    }
+                });
                 WritableMap event = Arguments.createMap();
                 event.putString("mediaPath", photoPath);
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -422,6 +432,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
                 event.putDouble("size", file.length());
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(mChatInput.getId(),
                         TAKE_PICTURE_EVENT, event);
+
             }
 
             @Override
@@ -545,6 +556,7 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
 
             }
         });
+
         return mChatInput;
     }
 
@@ -591,11 +603,11 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
     private double calculateMenuHeight() {
         double layoutHeight = mInitialChatInputHeight;
         if (mShowMenu) {
-            if (mChatInput.getSoftKeyboardHeight() != 0) {
-                layoutHeight += mChatInput.getSoftKeyboardHeight() / mDensity;
-            } else {
+//            if (mChatInput.getSoftKeyboardHeight() != 0) {
+//                layoutHeight += mChatInput.getSoftKeyboardHeight() / mDensity;
+//            } else {
                 layoutHeight += mMenuContainerHeight / mDensity;
-            }
+//            }
 
         }
         switch (mChatInput.getInputView().getLineCount()) {
@@ -671,6 +683,17 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
         chatInputView.getSelectAlbumBtn().setVisibility(flag ? View.VISIBLE : View.GONE);
     }
 
+    @ReactProp(name = "showRecordVideoBtn")
+    public void showRecordVideoBtn(ChatInputView chatInputView, boolean flag) {
+        if (flag) {
+            chatInputView.getRecordVideoBtn().setVisibility(View.VISIBLE);
+            chatInputView.getRecordVideoBtn().setTag("VISIBLE");
+        } else {
+            chatInputView.getRecordVideoBtn().setVisibility(View.GONE);
+            chatInputView.getRecordVideoBtn().setTag("GONE");
+        }
+    }
+
     @ReactProp(name = "inputPadding")
     public void setEditTextPadding(ChatInputView chatInputView, ReadableMap map) {
         try {
@@ -704,11 +727,64 @@ public class ReactChatInputManager extends ViewGroupManager<ChatInputView> imple
 
     @ReactProp(name = "hideCameraButton")
     public void hideCameraButton(ChatInputView chatInputView, boolean hide) {
-        if (hide) {
-            chatInputView.getCameraBtnContainer().setVisibility(View.GONE);
-        } else {
-            chatInputView.getCameraBtnContainer().setVisibility(View.VISIBLE);
+        chatInputView.getCameraBtnContainer().setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @ReactProp(name = "hideVoiceButton")
+    public void hideVoiceButton(ChatInputView chatInputView, boolean hide) {
+        chatInputView.getVoiceBtnContainer().setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @ReactProp(name = "hideEmojiButton")
+    public void hideEmojiButton(ChatInputView chatInputView, boolean hide) {
+        chatInputView.getEmojiBtnContainer().setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @ReactProp(name = "hidePhotoButton")
+    public void hidePhotoButton(ChatInputView chatInputView, boolean hide) {
+        chatInputView.getPhotoBtnContainer().setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    @ReactProp(name = "customLayoutItems")
+    public void setCustomItems(ChatInputView chatInputView, ReadableMap map) {
+        
+        ReadableArray left = map.hasKey("left") ? map.getArray("left") : null;
+        ReadableArray right = map.hasKey("right") ? map.getArray("right") : null;
+        ReadableArray bottom = map.hasKey("bottom") ? map.getArray("bottom") : null;
+        String[] bottomTags = new String[0];
+        if (bottom != null && bottom.size()>1) {
+            bottomTags = new String[bottom.size()];
+            for (int i = 0; i < bottom.size(); i++) {
+                bottomTags[i] = bottom.getString(i);
+            }
+            mInitialChatInputHeight = 100;
+        }else {
+            mInitialChatInputHeight = 56;
         }
+
+        String[] leftTags = new String[0];
+        if (left != null) {
+            leftTags = new String[left.size()];
+            for (int i = 0; i < left.size(); i++) {
+                leftTags[i] = left.getString(i);
+            }
+        }
+
+        String[] rightTags = new String[0];
+        if (right != null) {
+            rightTags = new String[right.size()];
+            for (int i = 0; i < right.size(); i++) {
+                rightTags[i] = right.getString(i);
+            }
+        }
+        mChatInput.getMenuManager()
+                .setMenu(Menu.newBuilder()
+                        .customize(true)
+                        .setLeft(leftTags)
+                        .setRight(rightTags)
+                        .setBottom(bottomTags)
+                        .build());
+
     }
 
     @Override

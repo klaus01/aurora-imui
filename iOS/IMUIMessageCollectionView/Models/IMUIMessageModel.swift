@@ -38,7 +38,6 @@ open class IMUIMessageModel: NSObject, IMUIMessageModelProtocol {
   
   @objc public var duration: CGFloat
 
-  
   open var msgId = {
     return ""
   }()
@@ -77,6 +76,10 @@ open class IMUIMessageModel: NSObject, IMUIMessageModelProtocol {
     return ""
   }
   
+  open func webImageUrl() -> String {
+    return ""
+  }
+  
   public init(msgId: String, messageStatus: IMUIMessageStatus, fromUser: IMUIUserProtocol, isOutGoing: Bool, time: String, type: String, cellLayout: IMUIMessageCellLayoutProtocol, duration: CGFloat?) {
     self.msgId = msgId
     self.fromUser = fromUser
@@ -88,20 +91,22 @@ open class IMUIMessageModel: NSObject, IMUIMessageModelProtocol {
     self.duration = duration ?? 0.0
     
     super.init()
-      self.cellLayout = cellLayout
+    self.cellLayout = cellLayout
   }
   
   open var resizableBubbleImage: UIImage {
     var bubbleImg: UIImage?
     if isOutGoing {
       bubbleImg = UIImage.imuiImage(with: "outGoing_bubble")
-      bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsetsMake(24, 10, 9, 15), resizingMode: .tile)
+      bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsets(top: 24, left: 10, bottom: 9, right: 15), resizingMode: .tile)
     } else {
       bubbleImg = UIImage.imuiImage(with: "inComing_bubble")
-      bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsetsMake(24, 15, 9, 10), resizingMode: .tile)
+
+      bubbleImg = bubbleImg?.resizableImage(withCapInsets: UIEdgeInsets(top: 24, left: 15, bottom: 9, right: 10), resizingMode: .tile)
     }
     
     return bubbleImg!
   }
   
 }
+

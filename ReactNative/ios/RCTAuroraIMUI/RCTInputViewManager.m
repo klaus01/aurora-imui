@@ -46,13 +46,14 @@ RCT_EXPORT_VIEW_PROPERTY(onShowKeyboard, RCTBubblingEventBlock)
 RCT_EXPORT_MODULE()
 - (UIView *)view
 {
-  NSBundle *bundle = [NSBundle bundleForClass: [RCTInputView class]];
+  NSBundle *bundle = [NSBundle bundleForClass: [IMUIInputView class]];
   _rctInputView = [[bundle loadNibNamed:@"RCTInputView" owner:self options: nil] objectAtIndex:0];
-  _rctInputView.imuiIntputView.inputViewDelegate = self;
+  _rctInputView.imuiIntputView.delegate = self;
   return _rctInputView;
+//    return [UIView new];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(chatInputBackgroupColor, NSString, RCTInputView) {
+RCT_CUSTOM_VIEW_PROPERTY(chatInputBackgroundColor, NSString, RCTInputView) {
   NSString *colorString = [RCTConvert NSString: json];
   UIColor *color = [UIColor hexStringToUIColorWithHex:colorString];
   if (color != nil) {
@@ -60,7 +61,7 @@ RCT_CUSTOM_VIEW_PROPERTY(chatInputBackgroupColor, NSString, RCTInputView) {
       view.backgroundColor = color;
     }
   }
-  _rctInputView.imuiIntputView.featureSelectorView.featureListCollectionView.backgroundColor = color;
+  [_rctInputView.imuiIntputView setBackgroundColorWithColor: color];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(inputPadding, NSDictionary, RCTInputView) {
@@ -99,6 +100,12 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
   _rctInputView.compressionQuality = compressionQuality;
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(customLayoutItems, NSDictionary, RCTInputView) {
+  NSDictionary *customLayoutItems = [RCTConvert NSDictionary: json];
+  [_rctInputView.imuiIntputView setupDataWithDicWithDic: customLayoutItems];
+  [_rctInputView.imuiIntputView reloadData];
+  [_rctInputView.imuiIntputView layoutInputBar];
+}
 
 /// Tells the delegate that user tap send button and text input string is not empty
 - (void)sendTextMessage:(NSString * _Nonnull)messageText {
@@ -111,9 +118,11 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 - (void)switchToMicrophoneModeWithRecordVoiceBtn:(UIButton * _Nonnull)recordVoiceBtn {
   // TODO:
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(298 + _rctInputView.inputTextHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom),
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
   
@@ -143,9 +152,11 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 - (void)switchToGalleryModeWithPhotoBtn:(UIButton * _Nonnull)photoBtn {
   
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(298 + _rctInputView.inputTextHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom),
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
   
@@ -157,9 +168,11 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 - (void)switchToEmojiModeWithCameraBtn:(UIButton * _Nonnull)cameraBtn {
   _rctInputView.maxKeyBoardHeight = 252;
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(298 + _rctInputView.inputTextHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom),
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
   
@@ -222,10 +235,12 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 - (void)textDidChangeWithText:(NSString * _Nonnull)text {
   
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(46 + _rctInputView.inputTextHeight +
                                    _rctInputView.maxKeyBoardHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)
                                    ),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
@@ -234,9 +249,11 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 /// Tells the delegate that IMUIInputView will switch to camera mode
 - (void)switchToCameraModeWithCameraBtn:(UIButton * _Nonnull)cameraBtn {
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(298 + _rctInputView.inputTextHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom),
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
   
@@ -281,9 +298,11 @@ RCT_CUSTOM_VIEW_PROPERTY(compressionQuality, NSNumber, RCTInputView) {
 
 - (void)keyBoardWillShowWithHeight:(CGFloat)height durationTime:(double)durationTime {
   if(_rctInputView.onSizeChange) {
+    BOOL needShow = [_rctInputView.imuiIntputView isNeedShowBottomView];
     _rctInputView.onSizeChange(@{@"height":@(height + 46 + _rctInputView.inputTextHeight +
                                    _rctInputView.imuiIntputView.inputTextViewPadding.top +
-                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom),
+                                   _rctInputView.imuiIntputView.inputTextViewPadding.bottom +
+                                   (needShow?0:-46)),
                                  @"width":@(_rctInputView.frame.size.width)});
   }
   

@@ -21,7 +21,7 @@ const AuroraIMUIController = IMUI.AuroraIMUIController; // the IMUI controller, 
 
 Refer to iOS,Android example
 
-> [Example usage](./../sample/app/app.js)
+> [Example usage](../sample/App.js)
 
 
 
@@ -32,6 +32,7 @@ Refer to iOS,Android example
   - [stopPlayVoice](#stopplayvoice)
   - [removeMessage](#removeMessage)
   - [removeAllMessage](#removeAllMessage)
+  - [hidenFeatureView](#hidenfeatureview)
   - [Event](#auroraimuicontrollerevent)
     - [MessageListDidLoadListener](#messagelistdidloadlistener)
 
@@ -77,8 +78,10 @@ Refer to iOS,Android example
     - [isAllowPullToRefresh](#isallowpulltorefresh)
 - [ChatInput](#chatinput)
   - [Props customizable style]()
-    - [chatInputBackgroupColor](#chatInputbackgroupcolor)
-    - [showSelectAlbumBtn](#showSelectAlbumBtn)
+    - [customLayoutItems](#customlayoutitemsios-only)
+    - [chatInputBackgroundColor](#chatInputBackgroundColor)
+    - [showSelectAlbumBtn](#showselectalbumbtnandroid-only)
+    - [showRecordVideoBtn](#showRecordVideoBtnandroid-only) 
     - [inputPadding](#inputPadding)
     - [inputTextColor](#inputTextColor)
     - [inputTextSize](#inputTextSize)
@@ -98,6 +101,8 @@ Refer to iOS,Android example
     - [onSwitchToCameraMode](#onswitchtocameramode)
     - [onSwitchToEmojiMode](#onswitchtoemojimode)
     - [onSizeChange](#onsizechange)
+    - [onFullScreen](#onfullscreen)
+    - [onRecoverScreen](#onrecoverscreen)
     - [onTouchEditText](#ontouchedittext)
     - [onClickSelectAlbum](#onClickSelectAlbum)
 
@@ -159,7 +164,7 @@ AuroraIMUIController.updateMessage(message);
 
 param: [{[message](./Models.md#message)}]
 
-Insert messages to the top of the MessageList, usually use this method to load history messages.
+Insert messages to the top of the MessageList, usually use this method to load history messages. **The messages to be inserted must be sorted chronologically.**
 
 example:
 
@@ -230,6 +235,16 @@ Remove all messages.
 example:
 ```js
 AuroraIMUIController.removeAllMessage()
+```
+
+#### hidenFeatureView
+
+hiden inputView's featureView.
+
+example:
+
+```
+AuroraIMUIController.hidenFeatureView()
 ```
 
 #### MessageListDidLoadListener
@@ -559,22 +574,55 @@ Example: ```isAllowPullToRefresh={ture}```。
 
 ***
 
-#### chatInputBackgroupColor
+#### customLayoutItems
+
+**PropTypes.string:** 
+
+Customize ChatInput feature and layout。
+
+Eample: 
+
+```
+// You can put item into ChatInput's left/right/bottom part，(Can’t be repeated！)
+customLayoutItems={{
+            left: ['voice'],
+            right: ['send'],
+            bottom: ['gallery','emoji','camera']
+		}} 
+		
+
+// if you don't put element in left/right/bottom ChatInput will hidden the part.
+customLayoutItems={{
+            left: ['voice'],
+            right: ['send']
+		}} 
+```
+
+#### chatInputBackgroundColor
 
 **PropTypes.string:**
 
 Set chatInput' background  color.
 
-Example:  ```chatInputBackgroupColor="#000000"```
+Example:  ```chatInputBackgroundColor="#000000"```
 
 ***
 
-#### showSelectAlbumBtn
+#### showSelectAlbumBtn(Android Only)
 **PropTypes.bool:**
 
 Set the visibility of the select album button.
 
 Example: ```showSelectAlbumBtn={true}```
+
+------
+
+#### showRecordVideoBtn(Android Only)
+**PropTypes.bool:**
+
+Set the visibility of the record video button.
+
+Example: ```showRecordVideoBtn={true}```
 
 ------
 ### inputPadding
@@ -661,7 +709,7 @@ Fires when click record video button.
 
  Fires when finished recording video. 
 
-Result's type is  ```{mediaPath: string, durationTime: number}```。
+Result's type is  ```{mediaPath: string, duration: number}```。
 
 ------
 
@@ -739,15 +787,33 @@ Fires when ChantInput's size change。
 
 ***
 
+#### onFullScreen
+
+**PropTypes.function:** `() => {}`
+
+Fires when camera switch into full screen mode.
+
+***
+
+#### onRecoverScreen
+
+**PropTypes.function:** `() => {}`
+
+Fires when camera cancel full screen mode.
+
+***
+
 #### onTouchEditText
 
 **PropTypes.function:** （Android only）
 
-Fires when click input view.
+Fires when click input view text input.
+
+***
 
 #### onClickSelectAlbum
 
-**PropTypes.function:** `() => {}`
+**PropTypes.function:** `() => {}`（Android only）
 
 Fires when click select album button(you can through [showSelectAlbumBtn](#showSelectAlbumBtn) change the visibility )
 

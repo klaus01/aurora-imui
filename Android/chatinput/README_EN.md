@@ -11,7 +11,9 @@ Provides several ways to add dependency, you can choose one of them:
 
 - Via Gradle
 ```groovy
-compile 'cn.jiguang.imui:chatinput:0.7.3'
+
+compile 'cn.jiguang.imui:chatinput:0.9.1'
+
 ```
 
 - Via Maven
@@ -20,7 +22,7 @@ compile 'cn.jiguang.imui:chatinput:0.7.3'
 <dependency>
   <groupId>cn.jiguang.imui</groupId>
   <artifactId>chatinput</artifactId>
-  <version>0.7.3</version>
+  <version>0.9.1</version>
   <type>pom</type>
 </dependency>
 ```
@@ -41,7 +43,7 @@ allprojects {
 
 ```groovy
 dependencies {
-  compile 'com.github.jpush:imui:0.7.6'
+  compile 'com.github.jpush:imui:0.9.1'
 }
 ```
 
@@ -273,5 +275,98 @@ Since 0.4.5, take picture will return default path.
 mChatInput.setCameraCaptureFile(path, fileName);
 ```
 
+## MenuManager(Support since 0.9.0)
+
+Menu management class, used to add a custom menu, freely set the position of the menu item, including the left/right/lower position of the chatinput.
+
+### Get MenuManager
+
+`MenuManager menuManager = mChatInput.getMenuManager();`
+
+
+### Add custom menu
+
+1. Add custom menu item layout，the root node has to be MenuItem(Extends LinearLayout)
+```xml
+<cn.jiguang.imui.chatinput.menu.view.MenuItem 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    ...
+
+</cn.jiguang.imui.chatinput.menu.view.MenuItem>
+```
+
+2. Add custom menu feature layout，the root node has to be MenuFeature(Extends LinearLayout)
+```xml
+<cn.jiguang.imui.chatinput.menu.view.MenuFeature 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    ...
+
+</cn.jiguang.imui.chatinput.menu.view.MenuFeature>
+```
+3. Add custom menu by MenuManager
+```java
+//First：add view mode, tag must be unique
+//If set menuFeature as null means that this menu item does not require a corresponding function.
+addCustomMenu(String tag, MenuItem menuItem, MenuFeature menuFeature)
+
+//Second: add layout resources, tag must be unique
+//If set menuFeatureResource as -1 means that this menu item does not require a corresponding function.
+addCustomMenu(String tag, int menuItemResource, int menuFeatureResource) 
+```
+4. CustomMenuEventListener
+```java
+menuManager.setCustomMenuClickListener(new CustomMenuEventListener() {
+            @Override
+            public boolean onMenuItemClick(String tag, MenuItem menuItem) {
+                //Menu feature will not be shown if return false；
+                return true;
+            }
+
+            @Override
+            public void onMenuFeatureVisibilityChanged(int visibility, String tag, MenuFeature menuFeature) {
+                if(visibility == View.VISIBLE){
+                    // Menu feature is visible.
+                }else {
+                    // Menu feature is gone.
+                }
+            }
+        });
+```
+### Set the position of the menu item
+`setMenu(Menu menu)`
+
+#### Menu
+
+The position is controlled by passing in the tag of the menu item. The default layout tags are:
+
+```Java
+Menu.TAG_VOICE 
+Menu.TAG_EMOJI
+Menu.TAG_GALLERY
+Menu.TAG_CAMERA
+Menu.TAG_SEND
+```
+Set position,tag cannot be repeated：
+
+```java
+Menu.newBuilder().
+        customize(boolean customize).// Whether to customize the position
+        setLeft(String ... tag).// Set left menu items
+        setRight(String ... tag).// Set right menu items
+        setBottom(String ... tag).//Set bottom menu items
+        build()
+```
+#### Sample
+```java
+menuManager.setMenu(Menu.newBuilder().
+                customize(true).
+                setRight(Menu.TAG_SEND).
+                setBottom(Menu.TAG_VOICE,Menu.TAG_EMOJI,Menu.TAG_GALLERY,Menu.TAG_CAMERA).
+                build());
+```
 
 

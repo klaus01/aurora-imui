@@ -48,7 +48,7 @@ static NSString *cellIdentify = nil;
 RCT_EXPORT_MODULE()
 - (UIView *)view
 {
-  NSBundle *bundle = [NSBundle bundleForClass: [RCTMessageListView class]];
+  NSBundle *bundle = [NSBundle bundleForClass: [IMUIMessageCollectionView class]];
   
   _messageList = [[bundle loadNibNamed:@"RCTMessageListView" owner:self options: nil] objectAtIndex:0];
   _messageList.messageList.delegate = self;
@@ -95,6 +95,12 @@ RCT_CUSTOM_VIEW_PROPERTY(messageListBackgroundColor, NSString, RCTMessageListVie
     _messageList.messageList.messageCollectionView.backgroundColor = color;
   }
   
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(maxBubbleWidth, NSNumber, RCTMessageListView) {
+  NSNumber *widthPercent = [RCTConvert NSNumber: json];
+  
+  IMUIMessageCellLayout.bubbleMaxWidth = UIScreen.mainScreen.bounds.size.width * widthPercent.floatValue;
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(sendBubbleTextColor, NSString, RCTMessageListView) {

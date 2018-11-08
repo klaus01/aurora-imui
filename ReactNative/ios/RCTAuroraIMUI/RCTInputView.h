@@ -18,10 +18,12 @@
 
 @property (nonatomic, assign)CGFloat maxKeyBoardHeight;
 
-@property(strong, nonatomic) NSString *chatInputBackgroupColor;
+@property(strong, nonatomic) NSString *chatInputBackgroundColor;
 
 @property(strong, nonatomic) NSNumber *galleryScale;
 @property(strong, nonatomic) NSNumber *compressionQuality;
+
+@property(strong, nonatomic) NSDictionary *customLayoutItems;
 
 @property (nonatomic, copy) RCTBubblingEventBlock onEventCallBack;
 

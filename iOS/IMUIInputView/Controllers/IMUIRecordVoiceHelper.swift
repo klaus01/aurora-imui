@@ -84,7 +84,12 @@ class IMUIRecordVoiceHelper: NSObject {
     
     let audioSession:AVAudioSession = AVAudioSession.sharedInstance()
     do {
-      try audioSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
+      if #available(iOS 10.0, *) {
+        try audioSession.setCategory(.playAndRecord, mode: .default)
+      } else {
+        AVAudioSession.sharedInstance().perform(NSSelectorFromString("setCategory:error:"), with: AVAudioSession.Category.playAndRecord)
+      }
+
     } catch let error as NSError {
       print("could not set session category")
       print(error.localizedDescription)
@@ -96,12 +101,6 @@ class IMUIRecordVoiceHelper: NSObject {
       print("could not set session active")
       print(error.localizedDescription)
     }
-    
-//    let recordSettings:[String : AnyObject] = [
-//      AVFormatIDKey: NSNumber(value: kAudioFormatAppleIMA4 as UInt32),
-//      AVNumberOfChannelsKey: 1 as AnyObject,
-//      AVSampleRateKey : 16000.0 as AnyObject
-//    ]
     
     let recordSettings = [
       AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -128,7 +127,7 @@ class IMUIRecordVoiceHelper: NSObject {
     }
 
     self.updater = CADisplayLink(target: self, selector: #selector(self.trackAudio))
-    updater.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
+    updater.add(to: RunLoop.current, forMode: .common)
     updater.frameInterval = 1
     
     if self.startRecordCallBack != nil {
@@ -146,6 +145,7 @@ class IMUIRecordVoiceHelper: NSObject {
     self.stopRecord()
     if let _ = recordPath {
       return (voiceFilePath: recordPath!, duration: duration)
+        
     } else {
       return ("",0)
     }
