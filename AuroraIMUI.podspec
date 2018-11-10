@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AuroraIMUI"
-  s.version          = "0.10.0.1"
+  s.version          = "0.12.0.1"
   s.summary          = "An messages UI library for iOS."
 
   s.homepage         = "https://www.jiguang.cn"
