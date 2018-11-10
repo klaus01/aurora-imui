@@ -46,6 +46,7 @@ import UIKit
   @objc public static var nameLablePadding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)//
   
   
+  @objc public static var timeStringAlignment: NSTextAlignment = .center
   @objc public static var timeStringColor: UIColor = UIColor(netHex: 0x90A6C4)
   @objc public static var timeStringFont: UIFont = UIFont.systemFont(ofSize: 12)
   @objc public static var timeStringBackgroundColor: UIColor = UIColor.clear//

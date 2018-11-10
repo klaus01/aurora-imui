@@ -111,7 +111,7 @@ open class IMUIMessageCollectionView: UIView {
     self.messageCollectionView.reloadDataNoScroll()
   }
   
-  open func insertMessages(with messages:[IMUIMessageProtocol]) {
+  open func insertMessages(with messages: [IMUIMessageProtocol]) {
     self.chatDataManager.insertMessages(with: messages)
     self.messageCollectionView.reloadDataNoScroll()
   }

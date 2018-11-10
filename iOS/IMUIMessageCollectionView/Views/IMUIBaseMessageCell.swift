@@ -63,7 +63,7 @@ open class IMUIBaseMessageCell: UICollectionViewCell, IMUIMessageCellProtocol {
   }
   
   fileprivate func setupSubViews() {
-    timeLabel.textAlignment = .center
+    timeLabel.textAlignment = IMUIMessageCellLayout.timeStringAlignment
     timeLabel.textColor = IMUIMessageCellLayout.timeStringColor
     timeLabel.font = IMUIMessageCellLayout.timeStringFont
     timeLabel.backgroundColor = IMUIMessageCellLayout.timeStringBackgroundColor
