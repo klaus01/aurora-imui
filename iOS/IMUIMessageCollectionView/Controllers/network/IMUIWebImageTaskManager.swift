@@ -91,7 +91,6 @@ class IMUIWebImageTaskManager: NSObject {
   func downloadImage(_ urlString: String, callback: @escaping downloadCompletionHandler) -> URLSessionTask? {
     
     guard let url = URL(string: urlString) else {
-      print("Error: cannot create URL")
       return nil
     }
     
