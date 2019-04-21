@@ -52,7 +52,7 @@ class MyMessageModel: IMUIMessageModel {
                                     timeLabelContentSize: CGSize.zero,
                                                     type: "voice")
     let msgId = "\(NSDate().timeIntervalSince1970 * 1000)"
-    self.init(msgId: msgId, messageStatus: .sending, fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "voice", text: "", mediaPath: voicePath, layout:  myLayout, duration: duration)
+    self.init(msgId: msgId, messageStatus: .sending(0), fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "voice", text: "", mediaPath: voicePath, layout:  myLayout, duration: duration)
   }
   
   convenience init(imagePath: String, isOutGoing: Bool) {
@@ -69,7 +69,7 @@ class MyMessageModel: IMUIMessageModel {
                                      bubbleContentInsets: UIEdgeInsets.zero,
                                     timeLabelContentSize: CGSize.zero,
                                        type: "image")
-    self.init(msgId: msgId, messageStatus: .sending, fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "image", text: "", mediaPath: imagePath, layout:  myLayout, duration: nil)
+    self.init(msgId: msgId, messageStatus: .sending(0), fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "image", text: "", mediaPath: imagePath, layout:  myLayout, duration: nil)
   }
   
   convenience init(videoPath: String, isOutGoing: Bool) {
@@ -80,7 +80,7 @@ class MyMessageModel: IMUIMessageModel {
                                     timeLabelContentSize: CGSize.zero,
                                                     type: "video")
     let msgId = "\(NSDate().timeIntervalSince1970 * 1000)"
-    self.init(msgId: msgId, messageStatus: .sending, fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "video", text: "", mediaPath: videoPath, layout:  myLayout, duration: nil)
+    self.init(msgId: msgId, messageStatus: .sending(0), fromUser: MyUser(), isOutGoing: isOutGoing, date: Date(), type: "video", text: "", mediaPath: videoPath, layout:  myLayout, duration: nil)
   }
   
   override func text() -> String {

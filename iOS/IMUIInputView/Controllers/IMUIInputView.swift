@@ -74,7 +74,7 @@ open class IMUIInputView: UIView {
     super.awakeFromNib()
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(self.keyboardFrameChanged(_:)),
-                                           name: NSNotification.Name.UIKeyboardWillChangeFrame,
+                                           name: UIResponder.keyboardWillChangeFrameNotification,
                                            object: nil)
     
     self.paddingLeft.constant = self.inputTextViewPadding.left
@@ -107,9 +107,9 @@ open class IMUIInputView: UIView {
   
   @objc func keyboardFrameChanged(_ notification: Notification) {
     let dic = NSDictionary(dictionary: (notification as NSNotification).userInfo!)
-    let keyboardValue = dic.object(forKey: UIKeyboardFrameEndUserInfoKey) as! NSValue
+    let keyboardValue = dic.object(forKey: UIResponder.keyboardFrameEndUserInfoKey) as! NSValue
     let bottomDistance = UIScreen.main.bounds.size.height - keyboardValue.cgRectValue.origin.y
-    let duration = Double(dic.object(forKey: UIKeyboardAnimationDurationUserInfoKey) as! NSNumber)
+    let duration = Double(dic.object(forKey: UIResponder.keyboardAnimationDurationUserInfoKey) as! NSNumber)
     
     UIView.animate(withDuration: duration) {
     if bottomDistance > 10.0 {

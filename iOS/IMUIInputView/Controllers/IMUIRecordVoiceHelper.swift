@@ -84,7 +84,11 @@ class IMUIRecordVoiceHelper: NSObject {
     
     let audioSession:AVAudioSession = AVAudioSession.sharedInstance()
     do {
-      try audioSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
+        if #available(iOS 10.0, *) {
+            try audioSession.setCategory(AVAudioSession.Category(rawValue: convertFromAVAudioSessionCategory(AVAudioSession.Category.playAndRecord)), mode: AVAudioSession.Mode.default)
+        } else {
+            // Fallback on earlier versions
+        }
     } catch let error as NSError {
       print("could not set session category")
       print(error.localizedDescription)
@@ -128,7 +132,7 @@ class IMUIRecordVoiceHelper: NSObject {
     }
 
     self.updater = CADisplayLink(target: self, selector: #selector(self.trackAudio))
-    updater.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
+    updater.add(to: RunLoop.current, forMode: RunLoop.Mode.common)
     updater.frameInterval = 1
     
     if self.startRecordCallBack != nil {
@@ -204,4 +208,9 @@ extension IMUIRecordVoiceHelper : AVAudioPlayerDelegate {
 // MARK: - AVAudioRecorderDelegate
 extension IMUIRecordVoiceHelper : AVAudioRecorderDelegate {
   
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
+	return input.rawValue
 }

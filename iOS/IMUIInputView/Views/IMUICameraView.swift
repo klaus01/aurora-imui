@@ -587,8 +587,8 @@ class IMUICameraView: UIView {
     stillImageOutput.outputSettings = [AVVideoCodecKey: AVVideoCodecJPEG]
     
     var videoConnection: AVCaptureConnection? = nil
-    for connection in stillImageOutput.connections as! [AVCaptureConnection] {
-      for port in connection.inputPorts as! [AVCaptureInput.Port]{
+    for connection in stillImageOutput.connections {
+      for port in connection.inputPorts {
         if port.mediaType == AVMediaType.video {
           videoConnection = connection
           break
@@ -604,7 +604,7 @@ class IMUICameraView: UIView {
       if imageSampleBuffer == nil {
         return
       }
-      let exifAttachments = CMGetAttachment(imageSampleBuffer!, kCGImagePropertyExifDictionary, nil)
+      let exifAttachments = CMGetAttachment(imageSampleBuffer!, key: kCGImagePropertyExifDictionary, attachmentModeOut: nil)
       
       if (exifAttachments != nil) {
         print("exifAttachments exit")

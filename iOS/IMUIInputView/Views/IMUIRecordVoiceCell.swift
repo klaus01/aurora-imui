@@ -60,7 +60,7 @@ class IMUIRecordVoiceCell: UICollectionViewCell, IMUIFeatureCellProtocol {
 
   func layoutPermissionView() {
     self.permissionDenyedView.type = "录音"
-    switch AVAudioSession.sharedInstance().recordPermission() {
+    switch AVAudioSession.sharedInstance().recordPermission {
     case .granted:
       self.permissionDenyedView.isHidden = true
       break
@@ -89,8 +89,8 @@ class IMUIRecordVoiceCell: UICollectionViewCell, IMUIFeatureCellProtocol {
   
   @IBAction func startRecordVoice(_ sender: Any) {
 
-    switch AVAudioSession.sharedInstance().recordPermission() {
-      case AVAudioSessionRecordPermission.granted:
+    switch AVAudioSession.sharedInstance().recordPermission {
+      case AVAudioSession.RecordPermission.granted:
         self.swtichToPlayModeBtn.isHidden = false
         self.cancelVoiceBtn.isHidden = false
         
@@ -106,10 +106,10 @@ class IMUIRecordVoiceCell: UICollectionViewCell, IMUIFeatureCellProtocol {
           self.timeLable.text = "\(String(format: "%02d", seconds / 60)):\(String(format: "%02d", seconds % 60))"
           
         }
-      case AVAudioSessionRecordPermission.denied:
+      case AVAudioSession.RecordPermission.denied:
         break
       
-      case AVAudioSessionRecordPermission.undetermined:
+      case AVAudioSession.RecordPermission.undetermined:
         AVAudioSession.sharedInstance().requestRecordPermission({ (granted) in })
         break
     }
@@ -118,7 +118,7 @@ class IMUIRecordVoiceCell: UICollectionViewCell, IMUIFeatureCellProtocol {
   }
   
   func finishRecordVoice() {
-    if AVAudioSession.sharedInstance().recordPermission() == .granted {
+    if AVAudioSession.sharedInstance().recordPermission == .granted {
       self.swtichToPlayModeBtn.isHidden = true
       self.cancelVoiceBtn.isHidden = true
       self.resetSubViewsStyle()
